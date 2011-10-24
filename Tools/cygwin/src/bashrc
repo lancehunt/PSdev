@@ -1,0 +1,46 @@
+# This is a modified version of Cygwin's default /etc/profile
+#  defaults are present; they are commented out and replaced if unavailable 
+#  
+#  Copyright (C) 2001 Joshua Daniel Franklin
+#  
+#  This is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+
+PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+unset DOSDRIVE
+unset DOSDIR
+unset TMPDIR
+unset TMP
+
+# Set up USER's home directory
+# cygwin-lite: $HOME and $USER are static since id is not included
+export USER="cygwin-lite"		#old line: export USER="`id -un`"
+export HOME="/home/cygwin-lite"		#old line: export HOME=/home/$USER
+
+for i in /etc/profile.d/*.sh ; do
+  if [ -f $i ]; then
+    . $i
+  fi
+done
+
+export MAKE_MODE=unix
+export PS1='\[\033]0;\w\007
+\033[32m\]\u@\h \[\033[33m\w\033[0m\]
+$ '
+
+#new lines for cygwin-lite
+cd "$HOME"
+export PS1='[\t]\W\$ '		#remove this line to use the original cygwin PS1
+alias vi='vim -c "set nocp"'	#use 'vim -C' to get compatibility mode
+alias rvim='vim -Z'		# ... and all of vim's various modes
+alias ex='vim -e'
+alias view='vim -R'
+alias rview='vim -RZ'
+alias gunzip='gzip -d'		#gzip/gunzip are the same 
+
+if [ -f $HOME/.bashrc ]; then
+  . $HOME/.bashrc
+fi
+

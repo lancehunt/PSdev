@@ -1,0 +1,551 @@
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of FIND</TITLE>
+</HEAD><BODY>
+<H1>FIND</H1>
+Section: Misc. Reference Manual Pages (1L)<BR><A HREF="#index">Index</A>
+<A HREF="./index.html">Return to Main Contents</A><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+find - search for files in a directory hierarchy
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>find</B>
+
+[path...] [expression]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+This manual page
+documents the GNU version of
+<B>find</B>.
+
+<B>find</B>
+
+searches the directory tree rooted at each given file name by
+evaluating the given expression from left to right, according to the
+rules of precedence (see section OPERATORS), until the outcome is
+known (the left hand side is false for <I>and</I> operations, true for
+<I>or</I>), at which point
+<B>find</B>
+
+moves on to the next file name.
+<P>
+
+The first argument that begins with `-', `(', `)', `,', or `!' is taken
+to be the beginning of the expression; any arguments before it are
+paths to search, and any arguments after it are the rest of the
+expression.  If no paths are given, the current directory is used.  If
+no expression is given, the expression `-print' is used.
+<P>
+
+<B>find</B>
+
+exits with status 0 if all files are processed successfully, greater
+than 0 if errors occur.
+<A NAME="lbAE">&nbsp;</A>
+<H2>EXPRESSIONS</H2>
+
+
+The expression is made up of options (which affect overall operation
+rather than the processing of a specific file, and always return true),
+tests (which return a true or false value), and actions (which have side
+effects and return a true or false value), all separated by operators.
+-and is assumed where the operator is omitted.  If the expression contains
+no actions other than -prune, -print is performed on all files
+for which the expression is true.
+<A NAME="lbAF">&nbsp;</A>
+<H3>OPTIONS</H3>
+
+
+All options always return true.  They always take effect, rather than
+being processed only when their place in the expression is reached.
+Therefore, for clarity, it is best to place them at the beginning of
+the expression.
+<DL COMPACT>
+<DT>-daystart<DD>
+Measure times (for -amin, -atime, -cmin, -ctime, -mmin, and -mtime)
+from the beginning of today rather than from 24 hours ago.
+<DT>-depth<DD>
+Process each directory's contents before the directory itself.
+<DT>-follow<DD>
+Dereference symbolic links.  Implies -noleaf.
+<DT>-help, --help<DD>
+Print a summary of the command-line usage of
+<B>find</B>
+
+and exit.
+<DT>-maxdepth <I>levels</I><DD>
+Descend at most <I>levels</I> (a non-negative integer) levels of
+directories below the command line arguments.  `-maxdepth 0' means
+only apply the tests and actions to the command line arguments.
+<DT>-mindepth <I>levels</I><DD>
+Do not apply any tests or actions at levels less than <I>levels</I> (a
+non-negative integer).  `-mindepth 1' means process all files except
+the command line arguments.
+<DT>-mount<DD>
+Don't descend directories on other filesystems.  An alternate name for
+-xdev, for compatibility with some other versions of
+<B>find</B>.
+
+<DT>-noleaf<DD>
+Do not optimize by assuming that directories contain 2 fewer
+subdirectories than their hard link count.  This option is needed when
+searching filesystems that do not follow the Unix directory-link
+convention, such as CD-ROM or MS-DOS filesystems or AFS volume mount
+points.  Each directory on a normal Unix filesystem has at least 2
+hard links: its name and its `.'  entry.  Additionally, its
+subdirectories (if any) each have a `..'  entry linked to that
+directory.  When
+<B>find</B>
+
+is examining a directory, after it has statted 2 fewer subdirectories
+than the directory's link count, it knows that the rest of the entries
+in the directory are non-directories (`leaf' files in the directory
+tree).  If only the files' names need to be examined, there is no need
+to stat them; this gives a significant increase in search speed.
+<DT>-version, --version<DD>
+Print the <B>find</B> version number and exit.
+<DT>-xdev<DD>
+Don't descend directories on other filesystems.
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H3>TESTS</H3>
+
+
+Numeric arguments can be specified as
+<DL COMPACT>
+<DT><I>+n</I><DD>
+for greater than
+<I>n</I>,
+
+<DT><I>-n</I><DD>
+for less than
+<I>n</I>,
+
+<DT><I>n</I><DD>
+for exactly
+<I>n</I>.
+
+<DT>-amin <I>n</I><DD>
+File was last accessed <I>n</I> minutes ago.
+<DT>-anewer <I>file</I><DD>
+File was last accessed more recently than <I>file</I> was modified.
+-anewer is affected by -follow only if -follow comes before
+-anewer on the command line.
+<DT>-atime <I>n</I><DD>
+File was last accessed <I>n</I>*24 hours ago.
+<DT>-cmin <I>n</I><DD>
+File's status was last changed <I>n</I> minutes ago.
+<DT>-cnewer <I>file</I><DD>
+File's status was last changed more recently than <I>file</I> was modified.
+-cnewer is affected by -follow only if -follow comes before
+-cnewer on the command line.
+<DT>-ctime <I>n</I><DD>
+File's status was last changed <I>n</I>*24 hours ago.
+<DT>-empty<DD>
+File is empty and is either a regular file or a directory.
+<DT>-false<DD>
+Always false.
+<DT>-fstype <I>type</I><DD>
+File is on a filesystem of type <I>type</I>.  The valid filesystem
+types vary among different versions of Unix; an incomplete list of
+filesystem types that are accepted on some version of Unix or another
+is: ufs, 4.2, 4.3, nfs, tmp, mfs, S51K, S52K.  You can use -printf
+with the %F directive to see the types of your filesystems.
+<DT>-gid <I>n</I><DD>
+File's numeric group ID is <I>n</I>.
+<DT>-group <I>gname</I><DD>
+File belongs to group <I>gname</I> (numeric group ID allowed).
+<DT>-ilname <I>pattern</I><DD>
+Like -lname, but the match is case insensitive.
+<DT>-iname <I>pattern</I><DD>
+Like -name, but the match is case insensitive.  For example, the
+patterns `fo*' and `F??' match the file names `Foo', `FOO', `foo',
+`fOo', etc.
+<DT>-inum <I>n</I><DD>
+File has inode number <I>n</I>.
+<DT>-ipath <I>pattern</I><DD>
+Like -path, but the match is case insensitive.
+<DT>-iregex <I>pattern</I><DD>
+Like -regex, but the match is case insensitive.
+<DT>-links <I>n</I><DD>
+File has <I>n</I> links.
+<DT>-lname <I>pattern</I><DD>
+File is a symbolic link whose contents match shell pattern
+<I>pattern</I>.  The metacharacters do not treat `/' or `.' specially.
+<DT>-mmin <I>n</I><DD>
+File's data was last modified <I>n</I> minutes ago.
+<DT>-mtime <I>n</I><DD>
+File's data was last modified <I>n</I>*24 hours ago.
+<DT>-name <I>pattern</I><DD>
+Base of file name (the path with the leading directories removed)
+matches shell pattern <I>pattern</I>.  The metacharacters (`*', `?',
+and `[]') do not match a `.' at the start of the base name.  To ignore
+a directory and the files under it, use -prune; see an example in the
+description of -path.
+<DT>-newer <I>file</I><DD>
+File was modified more recently than <I>file</I>.
+-newer is affected by -follow only if -follow comes before
+-newer on the command line.
+<DT>-nouser<DD>
+No user corresponds to file's numeric user ID.
+<DT>-nogroup<DD>
+No group corresponds to file's numeric group ID.
+<DT>-path <I>pattern</I><DD>
+File name matches shell pattern <I>pattern</I>.  The metacharacters do
+not treat `/' or `.' specially; so, for example,
+<BR>
+
+
+find . -path './sr*sc'
+<BR>
+
+
+will print an entry for a directory called './src/misc' (if one
+exists).  To ignore a whole directory tree, use -prune rather than
+checking every file in the tree.  For example, to skip the
+directory `src/emacs' and all files and directories under it, and
+print the names of the other files found, do something like this:
+<BR>
+
+
+find . -path './src/emacs' -prune -o -print
+<BR>
+
+
+<DT>-perm <I>mode</I><DD>
+File's permission bits are exactly <I>mode</I> (octal or symbolic).
+Symbolic modes use mode 0 as a point of departure.
+<DT>-perm -<I>mode</I><DD>
+All of the permission bits <I>mode</I> are set for the file.
+<DT>-perm +<I>mode</I><DD>
+Any of the permission bits <I>mode</I> are set for the file.
+<DT>-regex <I>pattern</I><DD>
+File name matches regular expression <I>pattern</I>.  This is a match
+on the whole path, not a search.  For example, to match a file named
+`./fubar3', you can use the regular expression `.*bar.' or `.*b.*3',
+but not `b.*r3'.
+<DT>-size <I>n</I>[bckw]<DD>
+File uses <I>n</I> units of space.  The units are 512-byte blocks by
+default or if `b' follows <I>n</I>, bytes if `c' follows <I>n</I>,
+kilobytes if `k' follows <I>n</I>, or 2-byte words if `w' follows <I>n</I>.
+The size does not count indirect blocks, but it does count blocks in
+sparse files that are not actually allocated.
+<DT>-true<DD>
+Always true.
+<DT>-type <I>c</I><DD>
+File is of type <I>c</I>:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>b<DD>
+block (buffered) special
+<DT>c<DD>
+character (unbuffered) special
+<DT>d<DD>
+directory
+<DT>p<DD>
+named pipe (FIFO)
+<DT>f<DD>
+regular file
+<DT>l<DD>
+symbolic link
+<DT>s<DD>
+socket
+</DL>
+</DL>
+
+<DT>-uid <I>n</I><DD>
+File's numeric user ID is <I>n</I>.
+<DT>-used <I>n</I><DD>
+File was last accessed <I>n</I> days after its status was last changed.
+<DT>-user <I>uname</I><DD>
+File is owned by user <I>uname</I> (numeric user ID allowed).
+<DT>-xtype <I>c</I><DD>
+The same as -type unless the file is a symbolic link.  For symbolic
+links: if -follow has not been given, true if the file is a link to a
+file of type <I>c</I>; if -follow has been given, true if <I>c</I> is
+`l'.  In other words, for symbolic links, -xtype checks the type of
+the file that -type does not check.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H3>ACTIONS</H3>
+
+<DL COMPACT>
+<DT>-exec <I>command</I> ;<DD>
+Execute <I>command</I>; true if 0 status is returned.  All following
+arguments to
+<B>find</B>
+
+are taken to be arguments to the command until an argument consisting
+of `;' is encountered.  The string `{}' is replaced by the current
+file name being processed everywhere it occurs in the arguments to the
+command, not just in arguments where it is alone, as in some versions
+of
+<B>find</B>.
+
+Both of these constructions might need to be escaped (with a `\') or
+quoted to protect them from expansion by the shell.  The command is
+executed in the starting directory.
+<DT>-fls <I>file</I><DD>
+True; like -ls but write to <I>file</I> like -fprint.
+<DT>-fprint <I>file</I><DD>
+True; print the full file name into file <I>file</I>.  If <I>file</I>
+does not exist when <B>find</B> is run, it is created; if it does
+exist, it is truncated.  The file names ``/dev/stdout'' and
+``/dev/stderr'' are handled specially; they refer to the standard
+output and standard error output, respectively.
+<DT>-fprint0 <I>file</I><DD>
+True; like -print0 but write to <I>file</I> like -fprint.
+<DT>-fprintf <I>file</I> <I>format</I><DD>
+True; like -printf but write to <I>file</I> like -fprint.
+<DT>-ok <I>command</I> ;<DD>
+Like -exec but ask the user first (on the standard input); if the
+response does not start with `y' or `Y', do not run the command, and
+return false.
+<DT>-print<DD>
+True; print the full file name on the standard output, followed by a newline.
+<DT>-print0<DD>
+True; print the full file name on the standard output, followed by a
+null character.  This allows file names that contain newlines to be
+correctly interpreted by programs that process the <B>find</B> output.
+<DT>-printf <I>format</I><DD>
+True; print <I>format</I> on the standard output, interpreting `\'
+escapes and `%' directives.  Field widths and precisions can be
+specified as with the `printf' C function.  Unlike -print, -printf
+does not add a newline at the end of the string.  The escapes and
+directives are:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>\a<DD>
+Alarm bell.
+<DT>\b<DD>
+Backspace.
+<DT>\c<DD>
+Stop printing from this format immediately and flush the output.
+<DT>\f<DD>
+Form feed.
+<DT>\n<DD>
+Newline.
+<DT>\r<DD>
+Carriage return.
+<DT>\t<DD>
+Horizontal tab.
+<DT>\v<DD>
+Vertical tab.
+<DT>\\<DD>
+A literal backslash (`\').
+</DL>
+<P>
+
+A `\' character followed by any other character is treated as an
+ordinary character, so they both are printed.
+<DL COMPACT>
+<DT>%%<DD>
+A literal percent sign.
+<DT>%a<DD>
+File's last access time in the format returned by the C `ctime' function.
+<DT>%A<I>k</I><DD>
+File's last access time in the format specified by <I>k</I>, which is
+either `@' or a directive for the C `strftime' function.  The possible
+values for <I>k</I> are listed below; some of them might not be
+available on all systems, due to differences in `strftime' between
+systems.
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>@<DD>
+seconds since Jan. 1, 1970, 00:00 GMT.
+</DL>
+<P>
+
+Time fields:
+<DL COMPACT>
+<DT>H<DD>
+hour (00..23)
+<DT>I<DD>
+hour (01..12)
+<DT>k<DD>
+hour ( 0..23)
+<DT>l<DD>
+hour ( 1..12)
+<DT>M<DD>
+minute (00..59)
+<DT>p<DD>
+locale's AM or PM
+<DT>r<DD>
+time, 12-hour (hh:mm:ss [AP]M)
+<DT>S<DD>
+second (00..61)
+<DT>T<DD>
+time, 24-hour (hh:mm:ss)
+<DT>X<DD>
+locale's time representation (H:M:S)
+<DT>Z<DD>
+time zone (e.g., EDT), or nothing if no time zone is determinable
+</DL>
+<P>
+
+Date fields:
+<DL COMPACT>
+<DT>a<DD>
+locale's abbreviated weekday name (Sun..Sat)
+<DT>A<DD>
+locale's full weekday name, variable length (Sunday..Saturday)
+<DT>b<DD>
+locale's abbreviated month name (Jan..Dec)
+<DT>B<DD>
+locale's full month name, variable length (January..December)
+<DT>c<DD>
+locale's date and time (Sat Nov 04 12:02:33 EST 1989)
+<DT>d<DD>
+day of month (01..31)
+<DT>D<DD>
+date (mm/dd/yy)
+<DT>h<DD>
+same as b
+<DT>j<DD>
+day of year (001..366)
+<DT>m<DD>
+month (01..12)
+<DT>U<DD>
+week number of year with Sunday as first day of week (00..53)
+<DT>w<DD>
+day of week (0..6)
+<DT>W<DD>
+week number of year with Monday as first day of week (00..53)
+<DT>x<DD>
+locale's date representation (mm/dd/yy)
+<DT>y<DD>
+last two digits of year (00..99)
+<DT>Y<DD>
+year (1970...)
+</DL>
+</DL>
+
+<DT>%b<DD>
+File's size in 512-byte blocks (rounded up).
+<DT>%c<DD>
+File's last status change time in the format returned by the C `ctime'
+function.
+<DT>%C<I>k</I><DD>
+File's last status change time in the format specified by <I>k</I>,
+which is the same as for %A.
+<DT>%d<DD>
+File's depth in the directory tree; 0 means the file is a command line
+argument.
+<DT>%f<DD>
+File's name with any leading directories removed (only the last element).
+<DT>%F<DD>
+Type of the filesystem the file is on; this value can be used for
+-fstype.
+<DT>%g<DD>
+File's group name, or numeric group ID if the group has no name.
+<DT>%G<DD>
+File's numeric group ID.
+<DT>%h<DD>
+Leading directories of file's name (all but the last element).
+<DT>%H<DD>
+Command line argument under which file was found.
+<DT>%i<DD>
+File's inode number (in decimal).
+<DT>%k<DD>
+File's size in 1K blocks (rounded up).
+<DT>%l<DD>
+Object of symbolic link (empty string if file is not a symbolic link).
+<DT>%m<DD>
+File's permission bits (in octal).
+<DT>%n<DD>
+Number of hard links to file.
+<DT>%p<DD>
+File's name.
+<DT>%P<DD>
+File's name with the name of the command line argument under which
+it was found removed.
+<DT>%s<DD>
+File's size in bytes.
+<DT>%t<DD>
+File's last modification time in the format returned by the C `ctime'
+function.
+<DT>%T<I>k</I><DD>
+File's last modification time in the format specified by <I>k</I>, 
+which is the same as for %A.
+<DT>%u<DD>
+File's user name, or numeric user ID if the user has no name.
+<DT>%U<DD>
+File's numeric user ID.
+</DL>
+<P>
+
+A `%' character followed by any other character is discarded (but the
+other character is printed).
+</DL>
+
+<DT>-prune<DD>
+If -depth is not given, true; do not descend the current directory.
+<BR>
+
+If -depth is given, false; no effect.
+<DT>-ls<DD>
+True; list current file in `ls -dils' format on standard output.
+The block counts are of 1K blocks, unless the environment variable
+POSIXLY_CORRECT is set, in which case 512-byte blocks are used.
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H3>OPERATORS</H3>
+
+
+Listed in order of decreasing precedence:
+<DL COMPACT>
+<DT>( <I>expr</I> )<DD>
+Force precedence.
+<DT>! <I>expr</I><DD>
+True if <I>expr</I> is false.
+<DT>-not <I>expr</I><DD>
+Same as ! <I>expr</I>.
+<DT><I>expr1 expr2</I><DD>
+And (implied); <I>expr2</I> is not evaluated if <I>expr1</I> is false.
+<DT><I>expr1</I> -a <I>expr2</I><DD>
+Same as <I>expr1 expr2</I>.
+<DT><I>expr1</I> -and <I>expr2</I><DD>
+Same as <I>expr1 expr2</I>.
+<DT><I>expr1</I> -o <I>expr2</I><DD>
+Or; <I>expr2</I> is not evaluated if <I>expr1</I> is true.
+<DT><I>expr1</I> -or <I>expr2</I><DD>
+Same as <I>expr1</I> -o <I>expr2</I>.
+<DT><I>expr1</I> , <I>expr2</I><DD>
+List; both <I>expr1</I> and <I>expr2</I> are always evaluated.
+The value of <I>expr1</I> is discarded; the value of the list is the
+value of <I>expr2</I>.
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="./xargs.html">xargs</A></B>(1L)
+<B>Finding Files</B> (on-line in Info, or printed)
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">EXPRESSIONS</A><DD>
+<DL>
+<DT><A HREF="#lbAF">OPTIONS</A><DD>
+<DT><A HREF="#lbAG">TESTS</A><DD>
+<DT><A HREF="#lbAH">ACTIONS</A><DD>
+<DT><A HREF="#lbAI">OPERATORS</A><DD>
+</DL>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="./index.html">man2html</A>,
+using the manual pages.<BR>
+Time: 23:18:00 GMT, January 29, 2001
+</BODY>
+</HTML>

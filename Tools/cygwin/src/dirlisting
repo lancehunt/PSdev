@@ -1,0 +1,34 @@
+ash 
+	sh.exe
+bash 
+	bash.exe
+cygwin
+	mount.exe
+	umount.exe
+fileutils
+	cp.exe
+	du.exe
+	ls.exe
+	mkdir.exe
+	mv.exe
+	rm.exe
+	rmdir.exe
+findutils
+	find.exe
+	xargs.exe
+grep
+	grep.exe
+gzip
+	gzip.exe
+less
+	less.exe
+sed
+	sed.exe
+tar
+	tar.exe
+textutils
+	cat.exe
+	sort.exe
+	wc.exe
+vim
+	vim.exe

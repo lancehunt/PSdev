@@ -1,0 +1,434 @@
+<HTML
+><HEAD
+><TITLE
+>Cygwin Utilities</TITLE
+>Back to <A HREF="index.html">Index of Commands</A><BODY
+CLASS="SECT1"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="SECT1"
+><H1
+CLASS="SECT1"
+><A
+NAME="USING-UTILS"
+>Cygwin Utilities</A
+></H1
+><P
+>NOTE: This page is an edited version of <TT>
+<A HREF="http://cygwin.com/cygwin-ug-net/using-utils.html">
+http://cygwin.com/cygwin-ug-net/using-utils.html</A></TT></P
+><P
+>Cygwin comes with a number of command-line utilities that are
+used to manage the UNIX emulation portion of the Cygwin environment.
+While many of these reflect their UNIX counterparts, each was written
+specifically for Cygwin.</P
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="MOUNT"
+>mount</A
+></H2
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="SCREEN"
+>Usage mount
+      mount [-bfs] &#60;win32path&#62; &#60;posixpath&#62;
+      mount [-bs] --change-cygdrive-prefix&#60;posixpath&#62;
+      mount --import-old-mounts
+
+  -b = text files are equivalent to binary files (newline = \n)
+  -x = files in the mounted directory are automatically given execute permission.
+  -f = force mount, don't warn about missing mount point directories
+  -s = add mount point to system-wide registry location
+  --change-automount-prefix = change path prefix used for automatic mount points
+  --import-old-mounts = copy old registry mount table mounts into the current mount areas
+
+  When invoked without any arguments, mount displays the current mount table.</PRE
+></TD
+></TR
+></TABLE
+><P
+>The <B
+CLASS="COMMAND"
+>mount</B
+> program is used to map your drives
+and shares onto Cygwin's simulated POSIX directory tree, much like as is
+done by mount commands on typical UNIX systems.  Please see
+the section called <I
+>The Cygwin Mount Table</I
+> for more information on the concepts
+behind the Cygwin POSIX file system and strategies for using
+mounts.</P
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN1049"
+>Using mount</A
+></H3
+><P
+>If you just type <B
+CLASS="COMMAND"
+>mount</B
+> with no parameters, it
+will display the current mount table for you.</P
+><DIV
+CLASS="EXAMPLE"
+><P
+><B
+>Example 3-9. Displaying the current set of mount points</B
+></P
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="SCREEN"
+><TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>mount</B
+></TT
+>
+Device           Directory           Type        Flags
+D:               /d                  user        textmode
+C:               /                   system      textmode</PRE
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>In this example, the C
+drive is the POSIX root and D drive is mapped to
+<TT
+CLASS="FILENAME"
+>/d</TT
+>.  Note that in this case, the root mount is a
+system-wide mount point that is visible to all users running Cygwin
+programs, whereas the <TT
+CLASS="FILENAME"
+>/d</TT
+> mount is only visible
+to the current user.</P
+><P
+>The <B
+CLASS="COMMAND"
+>mount</B
+> utility is also the mechanism for
+adding new mounts to the mount table.  The following example
+demonstrates how to mount the directory
+<TT
+CLASS="FILENAME"
+>C:\cygnus\cygwin-b20\H-i586-cygwin32\bin</TT
+>
+to <TT
+CLASS="FILENAME"
+>/bin</TT
+> and the network directory
+<TT
+CLASS="FILENAME"
+>\\pollux\home\joe\data</TT
+> to <TT
+CLASS="FILENAME"
+>/data</TT
+>.
+<TT
+CLASS="FILENAME"
+>/bin</TT
+> is assumed to already exist.</P
+><DIV
+CLASS="EXAMPLE"
+><P
+><B
+>Example 3-10. Adding mount points</B
+></P
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="SCREEN"
+><TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>ls /bin /data</B
+></TT
+>
+ls: /data: No such file or directory
+<TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>mount C:\cygnus\cygwin-b20\H-i586-cygwin32\bin /bin</B
+></TT
+>
+<TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>mount \\pollux\home\joe\data /data</B
+></TT
+>
+Warning: /data does not exist!
+<TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>mount</B
+></TT
+>
+Device           Directory           Type        Flags
+\\pollux\home\joe\data   /data       user        textmode
+C:\cygnus\cygwin-b20\H-i586-cygwin32\bin   /bin   user   textmode
+D:               /d                  user        textmode
+\\.\tape1:       /dev/st1            user        textmode
+\\.\tape0:       /dev/st0            user        textmode
+\\.\b:           /dev/fd1            user        textmode
+\\.\a:           /dev/fd0            user        textmode
+C:               /                   system      textmode
+<TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>ls /bin/sh</B
+></TT
+>
+/bin/sh</PRE
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>Note that <B
+CLASS="COMMAND"
+>mount</B
+> was invoked from the Windows
+command shell in the previous example.  In many Unix shells, including
+bash, it is legal and convenient to use the forward "/" in Win32
+pathnames since the "\" is the shell's escape character. </P
+><P
+>The "-s" flag to <B
+CLASS="COMMAND"
+>mount</B
+> is used to add a mount
+in the system-wide mount table used by all Cygwin users on the system,
+instead of the user-specific one.  System-wide mounts are displayed
+by <B
+CLASS="COMMAND"
+>mount</B
+> as being of the "system" type, as is the
+case for the <TT
+CLASS="FILENAME"
+>/</TT
+> partition in the last example.
+Under Windows NT, only those users with Administrator priviledges are
+permitted to modify the system-wide mount table.</P
+><P
+>Note that a given POSIX path may only exist once in the user
+table and once in the global, system-wide table.  Attempts to replace
+the mount will fail with a busy error.  The "-f" (force) flag causes
+the old mount to be silently replaced with the new one.  It will also
+silence warnings about the non-existence of directories at the Win32
+path location.</P
+><P
+>The "-b" flag is used to instruct Cygwin to treat binary and
+text files in the same manner by default.  Binary mode mounts are
+marked as "binmode" in the Flags column of <B
+CLASS="COMMAND"
+>mount</B
+>
+output.  By default, mounts are in text mode ("textmode" in the Flags
+column).</P
+><P
+>The "-x" flag is used to instruct Cygwin that the mounted file
+is "executable".  If the "-x" flag is used with a directory then
+all files in the directory are executable.  Files ending in certain
+extensions (.exe, .com, .bat, .cmd) are assumed to be executable
+by default.  Files whose first two characters begin with '#!' are
+also considered to be executable.  This option allows other files
+to be marked as executable and avoids the overhead of opening each
+file to check for a '#!'.</P
+></DIV
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN1091"
+>Cygdrive mount points</A
+></H3
+><P
+>Whenever Cygwin cannot use any of the existing mounts to convert
+from a particular Win32 path to a POSIX one, Cygwin will, instead,
+convert to a POSIX path using a default mount point:
+<TT
+CLASS="FILENAME"
+>/cygdrive</TT
+>.  For example, if Cygwin accesses
+<TT
+CLASS="FILENAME"
+>Z:\foo</TT
+> and the Z drive is not currently in the
+mount table, then <TT
+CLASS="FILENAME"
+>Z:\</TT
+> will be accessible as
+<TT
+CLASS="FILENAME"
+>/cygdrive/Z</TT
+>.  The default prefix of
+<TT
+CLASS="FILENAME"
+>/cygdrive</TT
+> may be changed via the
+ section called <I
+>mount</I
+> command.</P
+><P
+>The <B
+CLASS="COMMAND"
+>mount</B
+> utility can be used to change this
+default automount prefix through the use of the
+"--change-cygdrive-prefix" flag.  In the following example, we will
+set the automount prefix to <TT
+CLASS="FILENAME"
+>/</TT
+>:</P
+><DIV
+CLASS="EXAMPLE"
+><P
+><B
+>Example 3-11. Changing the default prefix</B
+></P
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><PRE
+CLASS="SCREEN"
+><TT
+CLASS="PROMPT"
+>c:\cygnus\&#62;</TT
+> <TT
+CLASS="USERINPUT"
+><B
+>mount --change-cygdrive-prefix /</B
+></TT
+></PRE
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>Note that you if you set a new prefix in this manner, you can
+specify the "-s" flag to make this the system-wide default prefix.  By
+default, the cygdrive-prefix applies only to the current user.  In the
+same way, you can specify the "-b" flag such that all new automounted
+filesystems default to binary mode file accesses.</P
+></DIV
+><DIV
+CLASS="SECT3"
+><H3
+CLASS="SECT3"
+><A
+NAME="AEN1109"
+>Limitations</A
+></H3
+><P
+>Limitations: there is a hard-coded limit of 30 mount
+points.  Also, although you can mount to pathnames that do not start
+with "/", there is no way to make use of such mount points.</P
+><P
+>Normally the POSIX mount point in Cygwin is an existing empty
+directory, as in standard UNIX. If this is the case, or if there is a
+place-holder for the mount point (such as a file, a symbolic link
+pointing anywhere, or a non-empty directory), you will get the expected
+behavior. Files present in a mount point directory before the mount
+become invisible to Cygwin programs.</P
+><P
+>It is sometimes desirable to mount to a non-existent directory,
+for example to avoid cluttering the root directory with names
+such as
+<TT
+CLASS="FILENAME"
+>a</TT
+>, <TT
+CLASS="FILENAME"
+>b</TT
+>, <TT
+CLASS="FILENAME"
+>c</TT
+>
+pointing to disks.
+Although <B
+CLASS="COMMAND"
+>mount</B
+> will give you a warning, most
+everything will work properly when you refer to the mount point
+explicitly.  Some strange effects can occur however.
+For example if your current working directory is
+<TT
+CLASS="FILENAME"
+>/dir</TT
+>,
+say, and <TT
+CLASS="FILENAME"
+>/dir/mtpt</TT
+> is a mount point, then
+<TT
+CLASS="FILENAME"
+>mtpt</TT
+> will not show up in an <B
+CLASS="COMMAND"
+>ls</B
+>
+or
+<B
+CLASS="COMMAND"
+>echo *</B
+> command and <B
+CLASS="COMMAND"
+>find .</B
+> will
+not
+find <TT
+CLASS="FILENAME"
+>mtpt</TT
+>.</P
+></DIV
+></DIV
+>Back to <A HREF="index.html">Index of Commands</A
+></BODY
+></HTML
+>

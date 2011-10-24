@@ -1,0 +1,1690 @@
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of LESS</TITLE>
+</HEAD><BODY>
+<H1>LESS</H1>
+Section: User Commands  (1)<BR>Updated: Version 340: 27 Apr 1999<BR><A HREF="#index">Index</A>
+<A HREF="./index.html">Return to Main Contents</A><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+less - opposite of more
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>less -?</B>
+
+<BR>
+
+<B>less --help</B>
+
+<BR>
+
+<B>less -V</B>
+
+<BR>
+
+<B>less --version</B>
+
+<BR>
+
+<B>less [-[+]aBcCdeEfgGiImMnNqQrsSuUVwX]</B>
+
+<BR>
+
+<B>     [-b </B><I>bufs</I>] [-h <I>lines</I>] [-j <I>line</I>] [-k <I>keyfile</I>]
+
+<BR>
+
+<B>     [-{oO} </B><I>logfile</I>] [-p <I>pattern</I>] [-P <I>prompt</I>] [-t <I>tag</I>]
+
+<BR>
+
+<B>     [-T </B><I>tagsfile</I>] [-x <I>tab</I>] [-y <I>lines</I>] [-[z] <I>lines</I>]
+
+<BR>
+
+<B>     [+[+]</B><I>cmd</I>] [--] [<I>filename</I>]...
+
+<BR>
+
+(See the OPTIONS section for alternate option syntax with long option names.)
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<I>Less</I>
+
+is a program similar to 
+<I>more</I>
+
+(1), but which allows backward movement
+in the file as well as forward movement.
+Also,
+<I>less</I>
+
+does not have to read the entire input file before starting,
+so with large input files it starts up faster than text editors like
+<I>vi</I>
+
+(1).
+<I>Less</I>
+
+uses termcap (or terminfo on some systems),
+so it can run on a variety of terminals.
+There is even limited support for hardcopy terminals.
+(On a hardcopy terminal, lines which should be printed at the top
+of the screen are prefixed with a caret.)
+<P>
+
+Commands are based on both
+<I>more</I>
+
+and
+<I>vi.</I>
+
+Commands may be preceded by a decimal number, 
+called N in the descriptions below.
+The number is used by some commands, as indicated.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>COMMANDS</H2>
+
+In the following descriptions, ^X means control-X.
+ESC stands for the ESCAPE key; for example ESC-v means the
+two character sequence &quot;ESCAPE&quot;, then &quot;v&quot;.
+<DL COMPACT>
+<DT>h or H<DD>
+Help: display a summary of these commands.
+If you forget all the other commands, remember this one.
+<DT>SPACE or ^V or f or ^F<DD>
+Scroll forward N lines, default one window (see option -z below).
+If N is more than the screen size, only the final screenful is displayed.
+Warning: some systems use ^V as a special literalization character.
+<DT>z<DD>
+Like SPACE, but if N is specified, it becomes the new window size.
+<DT>ESC-SPACE<DD>
+Like SPACE, but scrolls a full screenful, even if it reaches
+end-of-file in the process.
+<DT>RETURN or ^N or e or ^E or j or ^J<DD>
+Scroll forward N lines, default 1.
+The entire N lines are displayed, even if N is more than the screen size.
+<DT>d or ^D<DD>
+Scroll forward N lines, default one half of the screen size.
+If N is specified, it becomes the new default for 
+subsequent d and u commands.
+<DT>b or ^B or ESC-v<DD>
+Scroll backward N lines, default one window (see option -z below).
+If N is more than the screen size, only the final screenful is displayed.
+<DT>w<DD>
+Like ESC-v, but if N is specified, it becomes the new window size.
+<DT>y or ^Y or ^P or k or ^K<DD>
+Scroll backward N lines, default 1.
+The entire N lines are displayed, even if N is more than the screen size.
+Warning: some systems use ^Y as a special job control character.
+<DT>u or ^U<DD>
+Scroll backward N lines, default one half of the screen size.
+If N is specified, it becomes the new default for 
+subsequent d and u commands.
+<DT>ESC-) or RIGHTARROW<DD>
+Scroll horizontally right N characters, default 8.
+This behaves best if you also set the -S option (chop lines).
+Note that if you wish to enter a number N, you must use ESC-), not RIGHTARROW,
+because the arrow is taken to be a line editing command
+(see the LINE EDITING section).
+<DT>ESC-( or LEFTARROW<DD>
+Scroll horizontally left N characters, default 8.
+<DT>r or ^R or ^L<DD>
+Repaint the screen.
+<DT>R<DD>
+Repaint the screen, discarding any buffered input.
+Useful if the file is changing while it is being viewed.
+<DT>F<DD>
+Scroll forward, and keep trying to read when the
+end of file is reached.
+Normally this command would be used when already at the end of the file.
+It is a way to monitor the tail of a file which is growing
+while it is being viewed.
+(The behavior is similar to the &quot;tail -f&quot; command.)
+<DT>g or &lt; or ESC-&lt;<DD>
+Go to line N in the file, default 1 (beginning of file).
+(Warning: this may be slow if N is large.)
+<DT>G or &gt; or ESC-&gt;<DD>
+Go to line N in the file, default the end of the file.
+(Warning: this may be slow if N is large,
+or if N is not specified and
+standard input, rather than a file, is being read.)
+<DT>p or %<DD>
+Go to a position N percent into the file.
+N should be between 0 and 100.
+<DT>{<DD>
+If a left curly bracket appears in the top line displayed
+on the screen,
+the { command will go to the matching right curly bracket.
+The matching right curly bracket is positioned on the bottom
+line of the screen.
+If there is more than one left curly bracket on the top line,
+a number N may be used to specify the N-th bracket on the line.
+<DT>}<DD>
+If a right curly bracket appears in the bottom line displayed
+on the screen,
+the } command will go to the matching left curly bracket.
+The matching left curly bracket is positioned on the top
+line of the screen.
+If there is more than one right curly bracket on the top line,
+a number N may be used to specify the N-th bracket on the line.
+<DT>(<DD>
+Like {, but applies to parentheses rather than curly brackets.
+<DT>)<DD>
+Like }, but applies to parentheses rather than curly brackets.
+<DT>[<DD>
+Like {, but applies to square brackets rather than curly brackets.
+<DT>]<DD>
+Like }, but applies to square brackets rather than curly brackets.
+<DT>ESC-^F<DD>
+Followed by two characters,
+acts like {, but uses the two characters as open and close brackets,
+respectively.
+For example, &quot;ESC ^F &lt; &gt;&quot; could be used to 
+go forward to the &gt; which matches the &lt; in the top displayed line.
+<DT>ESC-^B<DD>
+Followed by two characters,
+acts like }, but uses the two characters as open and close brackets,
+respectively.
+For example, &quot;ESC ^B &lt; &gt;&quot; could be used to 
+go backward to the &lt; which matches the &gt; in the bottom displayed line.
+<DT>m<DD>
+Followed by any lowercase letter, 
+marks the current position with that letter.
+<DT>'<DD>
+(Single quote.)
+Followed by any lowercase letter, returns to the position which
+was previously marked with that letter.
+Followed by another single quote, returns to the position at
+which the last &quot;large&quot; movement command was executed.
+Followed by a ^ or $, jumps to the beginning or end of the
+file respectively.
+Marks are preserved when a new file is examined,
+so the ' command can be used to switch between input files.
+<DT>^X^X<DD>
+Same as single quote.
+<DT>/pattern<DD>
+Search forward in the file for the N-th line containing the pattern.
+N defaults to 1.
+The pattern is a regular expression, as recognized by
+<I>ed.</I>
+
+The search starts at the second line displayed
+(but see the -a and -j options, which change this).
+<P>
+Certain characters are special
+if entered at the beginning of the pattern;
+they modify the type of search rather than become part of the pattern:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>^N or !<DD>
+Search for lines which do NOT match the pattern.
+<DT>^E or *<DD>
+Search multiple files.
+That is, if the search reaches the END of the current file 
+without finding a match,
+the search continues in the next file in the command line list.
+<DT>^F or @<DD>
+Begin the search at the first line of the FIRST file
+in the command line list,
+regardless of what is currently displayed on the screen
+or the settings of the -a or -j options.
+<DT>^K<DD>
+Highlight any text which matches the pattern on the current screen, 
+but don't move to the first match (KEEP current position).
+<DT>^R<DD>
+Don't interpret regular expression metacharacters;
+that is, do a simple textual comparison.
+</DL>
+</DL>
+
+<DT>?pattern<DD>
+Search backward in the file for the N-th line containing the pattern.
+The search starts at the line immediately before the top line displayed.
+<P>
+Certain characters are special as in the / command:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>^N or !<DD>
+Search for lines which do NOT match the pattern.
+<DT>^E or *<DD>
+Search multiple files.
+That is, if the search reaches the beginning of the current file 
+without finding a match,
+the search continues in the previous file in the command line list.
+<DT>^F or @<DD>
+Begin the search at the last line of the last file
+in the command line list,
+regardless of what is currently displayed on the screen
+or the settings of the -a or -j options.
+<DT>^K<DD>
+As in forward searches.
+<DT>^R<DD>
+As in forward searches.
+</DL>
+</DL>
+
+<DT>ESC-/pattern<DD>
+Same as &quot;/*&quot;.
+<DT>ESC-?pattern<DD>
+Same as &quot;?*&quot;.
+<DT>n<DD>
+Repeat previous search, for N-th line containing the last pattern.
+If the previous search was modified by ^N, the search is made for the
+N-th line NOT containing the pattern.
+If the previous search was modified by ^E, the search continues
+in the next (or previous) file if not satisfied in the current file.
+If the previous search was modified by ^R, the search is done
+without using regular expressions.
+There is no effect if the previous search was modified by ^F or ^K.
+<DT>N<DD>
+Repeat previous search, but in the reverse direction.
+<DT>ESC-n<DD>
+Repeat previous search, but crossing file boundaries.
+The effect is as if the previous search were modified by *.
+<DT>ESC-N<DD>
+Repeat previous search, but in the reverse direction
+and crossing file boundaries.
+<DT>ESC-u<DD>
+Undo search highlighting.
+Turn off highlighting of strings matching the current search pattern. 
+If highlighting is already off because of a previous ESC-u command,
+turn highlighting back on.
+Any search command will also turn highlighting back on.
+(Highlighting can also be disabled by toggling the -G option;
+in that case search commands do not turn highlighting back on.)
+<DT>:e [filename]<DD>
+Examine a new file.
+If the filename is missing, the &quot;current&quot; file (see the :n and :p commands
+below) from the list of files in the command line is re-examined.
+A percent sign (%) in the filename is replaced by the name of the
+current file.  
+A pound sign (#) is replaced by the name of the previously examined file.
+However, two consecutive percent signs are simply 
+replaced with a single percent sign.  
+This allows you to enter a filename that contains a percent sign
+in the name.
+Similarly, two consecutive pound signs are replaced with a single pound sign.
+The filename is inserted into the command line list of files
+so that it can be seen by subsequent :n and :p commands.
+If the filename consists of several files, they are all inserted into
+the list of files and the first one is examined.
+If the filename contains one or more spaces,
+the entire filename should be enclosed in double quotes
+(also see the -&quot; option).
+<DT>^X^V or E<DD>
+Same as :e.
+Warning: some systems use ^V as a special literalization character.
+On such systems, you may not be able to use ^V.
+<DT>:n<DD>
+Examine the next file (from the list of files given in the command line).
+If a number N is specified, the N-th next file is examined.
+<DT>:p<DD>
+Examine the previous file in the command line list.
+If a number N is specified, the N-th previous file is examined.
+<DT>:x<DD>
+Examine the first file in the command line list.
+If a number N is specified, the N-th file in the list is examined.
+<DT>:d<DD>
+Remove the current file from the list of files.
+<DT>= or ^G or :f<DD>
+Prints some information about the file being viewed,
+including its name
+and the line number and byte offset of the bottom line being displayed.
+If possible, it also prints the length of the file,
+the number of lines in the file
+and the percent of the file above the last displayed line.
+<DT>-<DD>
+Followed by one of the command line option letters (see OPTIONS below),
+this will change the setting of that option
+and print a message describing the new setting.
+If a ^P (CONTROL-P) is entered immediately after the dash,
+the setting of the option is changed but no message is printed.
+If the option letter has a numeric value (such as -b or -h),
+or a string value (such as -P or -t),
+a new value may be entered after the option letter.
+If no new value is entered, a message describing
+the current setting is printed and nothing is changed.
+<DT>--<DD>
+Like the - command, but takes a long option name (see OPTIONS below)
+rather than a single option letter.
+You must press RETURN after typing the option name.
+A ^P immediately after the second dash suppresses printing of a 
+message describing the new setting, as in the - command.
+<DT>-+<DD>
+Followed by one of the command line option letters
+this will reset the option to its default setting
+and print a message describing the new setting.
+(The &quot;-+<I>X</I>&quot; command does the same thing
+as &quot;-+<I>X</I>&quot; on the command line.)
+This does not work for string-valued options.
+<DT>--+<DD>
+Like the -+ command, but takes a long option name
+rather than a single option letter.
+<DT>-!<DD>
+Followed by one of the command line option letters,
+this will reset the option to the &quot;opposite&quot; of its default setting
+and print a message describing the new setting.
+This does not work for numeric or string-valued options.
+<DT>--!<DD>
+Like the -! command, but takes a long option name
+rather than a single option letter.
+<DT>_<DD>
+(Underscore.)
+Followed by one of the command line option letters,
+this will print a message describing the current setting of that option.
+The setting of the option is not changed.
+<DT>__<DD>
+(Double underscore.)
+Like the _ (underscore) command, but takes a long option name
+rather than a single option letter.
+You must press RETURN after typing the option name.
+<DT>+cmd<DD>
+Causes the specified cmd to be executed each time a new file is examined.
+For example, +G causes 
+<I>less</I>
+
+to initially display each file starting at the end 
+rather than the beginning.
+<DT>V<DD>
+Prints the version number of 
+<I>less </I>
+
+being run.
+<DT>q or Q or :q or :Q or ZZ<DD>
+Exits
+<I>less.</I>
+
+</DL>
+<P>
+
+The following 
+four
+commands may or may not be valid, depending on your particular installation.
+<P>
+
+<DL COMPACT>
+<DT>v<DD>
+Invokes an editor to edit the current file being viewed.
+The editor is taken from the environment variable VISUAL if defined,
+or EDITOR if VISUAL is not defined,
+or defaults to &quot;vi&quot; if neither VISUAL nor EDITOR is defined.
+See also the discussion of LESSEDIT under the section on PROMPTS below.
+<DT>! shell-command<DD>
+Invokes a shell to run the shell-command given.
+A percent sign (%) in the command is replaced by the name of the
+current file.  
+A pound sign (#) is replaced by the name of the previously examined file.
+&quot;!!&quot; repeats the last shell command.
+&quot;!&quot; with no shell command simply invokes a shell.
+On Unix systems, the shell is taken from the environment variable SHELL,
+or defaults to &quot;sh&quot;.
+On MS-DOS and OS/2 systems, the shell is the normal command processor.
+<DT>| &lt;m&gt; shell-command<DD>
+&lt;m&gt; represents any mark letter.
+Pipes a section of the input file to the given shell command.
+The section of the file to be piped is between the first line on
+the current screen and the position marked by the letter.
+&lt;m&gt; may also be ^ or $ to indicate beginning or end of file respectively.
+If &lt;m&gt; is . or newline, the current screen is piped.
+<DT>s filename<DD>
+Save the input to a file.
+This only works if the input is a pipe, not an ordinary file.
+</DL>
+<P>
+
+<A NAME="lbAF">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+Command line options are described below.
+Most options may be changed while
+<I>less </I>
+
+is running, via the &quot;-&quot; command.
+<P>
+
+Most options may be given in one of two forms: 
+either a dash followed by a single letter,
+or two dashes followed by a long option name.
+A long option name may be abbreviated as long as
+the abbreviation is unambiguous.
+For example, --quit-at-eof may be abbreviated --quit, but not
+--qui, since both --quit-at-eof and --quiet begin with --qui.
+Some long option names are in uppercase, such as --QUIT-AT-EOF, as
+distinct from --quit-at-eof.
+Such option names need only have their first letter capitalized;
+the remainder of the name may be in either case.
+For example, --Quit-at-eof is equivalent to --QUIT-AT-EOF.
+<P>
+
+Options are also taken from the environment variable &quot;LESS&quot;.
+For example, 
+to avoid typing &quot;less -options ...&quot; each time 
+<I>less </I>
+
+is invoked, you might tell 
+<I>csh:</I>
+
+<P>
+setenv LESS &quot;-options&quot;
+<P>
+or if you use 
+<I>sh:</I>
+
+<P>
+LESS=&quot;-options&quot;; export LESS
+<P>
+On MS-DOS, you don't need the quotes, but you should replace any 
+percent signs in the options string by double percent signs.
+<P>
+The environment variable is parsed before the command line,
+so command line options override the LESS environment variable.
+If an option appears in the LESS variable, it can be reset
+to its default value on the command line by beginning the command
+line option with &quot;-+&quot;.
+<P>
+For options like -P or -D which take a following string,
+a dollar sign ($) must be used to signal the end of the string.
+For example, to set two -D options on MS-DOS, you must have
+a dollar sign between them, like this:
+<P>
+LESS=&quot;-Dn9.1$-Ds4.1&quot;
+<P>
+<DL COMPACT>
+<DT>-? or --help<DD>
+This option displays a summary of the commands accepted by
+<I>less</I>
+
+(the same as the h command).
+(Depending on how your shell interprets the question mark,
+it may be necessary to quote the question mark, thus: &quot;-\?&quot;.)
+<DT>-a or --search-skip-screen<DD>
+Causes searches to start after the last line
+displayed on the screen, 
+thus skipping all lines displayed on the screen.
+By default, searches start at the second line on the screen
+(or after the last found line; see the -j option).
+<DT>-b<I>n</I> or --buffers=<I>n</I><DD>
+Specifies the number of buffers
+<I>less</I>
+
+will use for each file.
+Buffers are 1K, and by default 10 buffers are used for each file
+(except if the file is a pipe; see the -B option).
+The number <I>n</I> specifies a different number of buffers to use.
+<DT>-B or --auto-buffers<DD>
+By default, when data is read from a pipe,
+buffers are allocated automatically as needed.
+If a large amount of data is read from the pipe, this can cause
+a large amount of memory to be allocated.
+The -B option disables this automatic allocation of buffers for pipes,
+so that only the number of buffers specified by the -b option are used.
+Warning: use of -B can result in erroneous display, since only the
+most recently viewed part of the file is kept in memory; 
+any earlier data is lost.
+<DT>-c or --clear-screen<DD>
+Causes full screen repaints to be painted from the top line down.
+By default,
+full screen repaints are done by scrolling from the bottom of the screen.
+<DT>-C or --CLEAR-SCREEN<DD>
+The -C option is like -c, but the screen is cleared before it is repainted.
+<DT>-d or --dumb<DD>
+The -d option suppresses the error message
+normally displayed if the terminal is dumb;
+that is, lacks some important capability,
+such as the ability to clear the screen or scroll backward.
+The -d option does not otherwise change the behavior of
+<I>less</I>
+
+on a dumb terminal).
+<DT>-D<B>x</B><I>color</I> or --color=<B>x</B><I>color</I><DD>
+[MS-DOS only]
+Sets the color of the text displayed.
+<B>x</B> is a single character which selects the type of text whose color is 
+being set: n=normal, s=standout, d=bold, u=underlined, k=blink.
+<I>color</I> is a pair of numbers separated by a period.  
+The first number selects the foreground color and the second selects 
+the background color of the text.
+A single number <I>N</I> is the same as <I>N.0</I>.
+<DT>-e or --quit-at-eof<DD>
+Causes 
+<I>less </I>
+
+to automatically exit
+the second time it reaches end-of-file.
+By default, the only way to exit 
+<I>less</I>
+
+is via the &quot;q&quot; command.
+<DT>-E or --QUIT-AT-EOF<DD>
+Causes 
+<I>less</I>
+
+to automatically exit the first time it reaches end-of-file.
+<DT>-f or --force<DD>
+Forces non-regular files to be opened.
+(A non-regular file is a directory or a device special file.)
+Also suppresses the warning message when a binary file is opened.
+By default,
+<I>less</I>
+
+will refuse to open non-regular files.
+<DT>-g or --hilite-search<DD>
+Normally, 
+<I>less </I>
+
+will highlight ALL strings which match the last search command.
+The -g option changes this behavior to highlight only the particular string 
+which was found by the last search command.
+This can cause 
+<I>less </I>
+
+to run somewhat faster than the default.
+<DT>-G or --HILITE-SEARCH<DD>
+The -G option suppresses all highlighting of strings found by search commands.
+<DT>-h<I>n</I> or ---max-back-scroll=<I>n</I><DD>
+Specifies a maximum number of lines to scroll backward.
+If it is necessary to scroll backward more than <I>n</I> lines,
+the screen is repainted in a forward direction instead.
+(If the terminal does not have the ability to scroll
+backward, -h0 is implied.)
+<DT>-i or --ignore-case<DD>
+Causes searches to ignore case; that is,
+uppercase and lowercase are considered identical.
+This option is ignored if any uppercase letters
+appear in the search pattern; 
+in other words,
+if a pattern contains uppercase letters, then that search does not ignore case.
+<DT>-I or --IGNORE-CASE<DD>
+Like -i, but searches ignore case even if 
+the pattern contains uppercase letters.
+<DT>-j<I>n</I> or --jump-target=<I>n</I><DD>
+Specifies a line on the screen where the &quot;target&quot; line
+is to be positioned.
+A target line is the object of a text search, 
+tag search, jump to a line number,
+jump to a file percentage, or jump to a marked position.
+The screen line is specified by a number: the top line on the screen
+is 1, the next is 2, and so on.
+The number may be negative to specify a line relative to the bottom
+of the screen: the bottom line on the screen is -1, the second
+to the bottom is -2, and so on.
+If the -j option is used, searches begin at the line immediately
+after the target line.
+For example, if &quot;-j4&quot; is used, the target line is the
+fourth line on the screen, so searches begin at the fifth line
+on the screen.
+<DT>-k<I>filename</I> or --lesskey-file=<I>filename</I><DD>
+Causes
+<I>less</I>
+
+to open and interpret the named file as a
+<I>lesskey</I>
+
+(1) file.
+Multiple -k options may be specified.
+If the LESSKEY environment variable is set, or
+if a lesskey file is found in a standard place (see KEY BINDINGS),
+it is also used as a 
+<I>lesskey</I>
+
+file.
+<DT>-m or --long-prompt<DD>
+Causes 
+<I>less</I>
+
+to prompt verbosely (like <I>more</I>),
+with the percent into the file.
+By default,
+<I>less</I>
+
+prompts with a colon.
+<DT>-M or --LONG-PROMPT<DD>
+Causes 
+<I>less</I>
+
+to prompt even more verbosely than 
+<I>more.</I>
+
+<DT>-n or --line-numbers<DD>
+Suppresses line numbers.
+The default (to use line numbers) may cause
+<I>less</I>
+
+to run more slowly in some cases, especially with a very large input file.
+Suppressing line numbers with the -n option will avoid this problem.
+Using line numbers means: the line number will be displayed in the verbose
+prompt and in the = command,
+and the v command will pass the current line number to the editor
+(see also the discussion of LESSEDIT in PROMPTS below).
+<DT>-N or --LINE-NUMBERS<DD>
+Causes a line number to be displayed at the beginning of
+each line in the display.
+<DT>-o<I>filename</I> or --log-file=<I>filename</I><DD>
+Causes
+<I>less</I>
+
+to copy its input to the named file as it is being viewed.
+This applies only when the input file is a pipe,
+not an ordinary file.
+If the file already exists, 
+<I>less</I>
+
+will ask for confirmation before overwriting it.
+<DT>-O<I>filename</I> or --LOG-FILE=<I>filename</I><DD>
+The -O option is like -o, but it will overwrite an existing
+file without asking for confirmation.
+<P>
+If no log file has been specified,
+the -o and -O options can be used from within 
+<I>less</I>
+
+to specify a log file.
+Without a file name, they will simply report the name of the log file.
+The &quot;s&quot; command is equivalent to specifying -o from within
+<I>less.</I>
+
+<DT>-p<I>pattern</I> or --pattern=<I>pattern</I><DD>
+The -p option on the command line is equivalent to 
+specifying +/<I>pattern</I>;
+that is, it tells
+<I>less</I>
+
+to start at the first occurrence of <I>pattern</I> in the file.
+<DT>-P<I>prompt</I> or --prompt=<I>prompt</I><DD>
+Provides a way to tailor the three prompt
+styles to your own preference.
+This option would normally be put in the LESS environment
+variable, rather than being typed in with each 
+<I>less</I>
+
+command.
+Such an option must either be the last option in the LESS variable,
+or be terminated by a dollar sign.
+-Ps followed by a string changes the default (short) prompt 
+to that string.
+-Pm changes the medium (-m) prompt.
+-PM changes the long (-M) prompt.
+-Ph changes the prompt for the help screen.
+-P= changes the message printed by the = command.
+All prompt strings consist of a sequence of 
+letters and special escape sequences.
+See the section on PROMPTS for more details.
+<DT>-q or --quiet or --silent<DD>
+Causes moderately &quot;quiet&quot; operation:
+the terminal bell is not rung 
+if an attempt is made to scroll past the end of the file
+or before the beginning of the file.
+If the terminal has a &quot;visual bell&quot;, it is used instead.
+The bell will be rung on certain other errors,
+such as typing an invalid character.
+The default is to ring the terminal bell in all such cases.
+<DT>-Q or --QUIET or --SILENT<DD>
+Causes totally &quot;quiet&quot; operation:
+the terminal bell is never rung.
+<DT>-r or --raw-control-chars<DD>
+Causes &quot;raw&quot; control characters to be displayed.
+The default is to display control characters using the caret notation;
+for example, a control-A (octal 001) is displayed as &quot;^A&quot;.
+Warning: when the -r option is used,
+<I>less</I>
+
+cannot keep track of the actual appearance of the screen
+(since this depends on how the screen responds to
+each type of control character).
+Thus, various display problems may result,
+such as long lines being split in the wrong place.
+<DT>-s or --squeeze-blank-lines<DD>
+Causes consecutive blank lines to be squeezed into a single blank line.
+This is useful when viewing
+<I>nroff</I>
+
+output.
+<DT>-S or --chop-long-lines<DD>
+Causes lines longer than the screen width to be
+chopped rather than folded.
+That is, the remainder of a long line is simply discarded.
+The default is to fold long lines; that is, display the remainder
+on the next line.
+<DT>-t<I>tag</I> or --tag=<I>tag</I><DD>
+The -t option, followed immediately by a TAG,
+will edit the file containing that tag.
+For this to work, there must be a file called &quot;tags&quot; in the
+current directory, which was previously built by the 
+<I>ctags</I>
+
+(1) command.
+This option may also be specified from within 
+<I>less </I>
+
+(using the - command) as a way of examining a new file.
+The command &quot;:t&quot; is equivalent to specifying -t from within
+<I>less.</I>
+
+<DT>-T<I>tagsfile</I> or --tag-file=<I>tagsfile</I><DD>
+Specifies a tags file to be used instead of &quot;tags&quot;.
+<DT>-u or --underline-special<DD>
+Causes backspaces and carriage returns to be treated as printable characters;
+that is, they are sent to the terminal when they appear in the input.
+<DT>-U or --UNDERLINE-SPECIAL<DD>
+Causes backspaces, tabs and carriage returns to be 
+treated as control characters;
+that is, they are handled as specified by the -r option.
+<P>
+By default, if neither -u nor -U is given,
+backspaces which appear adjacent to an underscore character
+are treated specially:
+the underlined text is displayed 
+using the terminal's hardware underlining capability.
+Also, backspaces which appear between two identical characters
+are treated specially: 
+the overstruck text is printed 
+using the terminal's hardware boldface capability.
+Other backspaces are deleted, along with the preceding character.
+Carriage returns immediately followed by a newline are deleted.
+other carriage returns are handled as specified by the -r option.
+Text which is overstruck or underlined can be searched for
+if neither -u nor -U is in effect.
+<DT>-V or --version<DD>
+Displays the version number of 
+<I>less.</I>
+
+<DT>-w or --hilite-unread<DD>
+Temporarily highlights the first &quot;new&quot; line after a forward movement
+of a full page.
+The first &quot;new&quot; line is the line immediately following the line previously
+at the bottom of the screen.
+The highlight is removed at the next command which causes movement.
+<DT>-W or --HILITE-UNREAD<DD>
+Like -w, but temporarily highlights the first new line after any 
+forward movement command larger than one line.
+<DT>-x<I>n</I> or --tabs=<I>n</I><DD>
+Sets tab stops every <I>n</I> positions.
+The default for <I>n</I> is 8.
+<DT>-X or --no-init<DD>
+Disables sending the termcap initialization and deinitialization strings
+to the terminal.
+This is sometimes desirable if the deinitialization string does
+something unnecessary, like clearing the screen.
+<DT>-y<I>n</I> or --max-forw-scroll=<I>n</I><DD>
+Specifies a maximum number of lines to scroll forward.
+If it is necessary to scroll forward more than <I>n</I> lines,
+the screen is repainted instead.
+The -c or -C option may be used to repaint from the top of
+the screen if desired.
+By default, any forward movement causes scrolling.
+<DT>-[z]<I>n</I> or --window=<I>n</I><DD>
+Changes the default scrolling window size to <I>n</I> lines.
+The default is one screenful.
+The z and w commands can also be used to change the window size.
+The &quot;z&quot; may be omitted for compatibility with
+<I>more.</I>
+
+If the number
+<I>n</I>
+
+is negative, it indicates 
+<I>n</I>
+
+lines less than the current screen size.
+For example, if the screen is 24 lines, <I>-z-4</I> sets the 
+scrolling window to 20 lines.  If the screen is resized to 40 lines,
+the scrolling window automatically changes to 36 lines.
+<DT>-<I>cc</I>&nbsp;or&nbsp;--quotes=<I>cc</I><DD>
+Changes the filename quoting character.
+This may be necessary if you are trying to name a file
+which contains both spaces and quote characters.
+Followed by a single character, this changes the quote character to that
+character.
+Filenames containing a space should then be surrounded by that character
+rather than by double quotes.
+Followed by two characters, changes the open quote to the first character,
+and the close quote to the second character.
+Filenames containing a space should then be preceded by the open quote
+character and followed by the close quote character.
+Note that even after the quote characters are changed, this option
+remains -&quot; (a dash followed by a double quote).
+<DT>-~ or --tilde<DD>
+Normally lines after end of file are displayed as a single tilde (~).
+This option causes lines after end of file to be displayed as blank lines.
+<DT>--<DD>
+A command line argument of &quot;--&quot; marks the end of option arguments.
+Any arguments following this are interpreted as filenames.
+This can be useful when viewing a file whose name begins with a &quot;-&quot; or &quot;+&quot;.
+<DT>+<DD>
+If a command line option begins with <B>+</B>,
+the remainder of that option is taken to be an initial command to
+<I>less.</I>
+
+For example, +G tells
+<I>less</I>
+
+to start at the end of the file rather than the beginning,
+and +/xyz tells it to start at the first occurrence of &quot;xyz&quot; in the file.
+As a special case, +&lt;number&gt; acts like +&lt;number&gt;g; 
+that is, it starts the display at the specified line number
+(however, see the caveat under the &quot;g&quot; command above).
+If the option starts with ++, the initial command applies to
+every file being viewed, not just the first one.
+The + command described previously
+may also be used to set (or change) an initial command for every file.
+<P>
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>LINE EDITING</H2>
+
+When entering command line at the bottom of the screen
+(for example, a filename for the :e command,
+or the pattern for a search command),
+certain keys can be used to manipulate the command line.
+Most commands have an alternate form in [ brackets ] which can be used if
+a key does not exist on a particular keyboard. 
+(The bracketed forms do not work in the MS-DOS version.)
+Any of these special keys may be entered literally by preceding
+it with the &quot;literal&quot; character, either ^V or ^A.
+A backslash itself may also be entered literally by entering two backslashes.
+<DL COMPACT>
+<DT>LEFTARROW [ ESC-h ]<DD>
+Move the cursor one space to the left.
+<DT>RIGHTARROW [ ESC-l ]<DD>
+Move the cursor one space to the right.
+<DT>^LEFTARROW [ ESC-b or ESC-LEFTARROW ]<DD>
+(That is, CONTROL and LEFTARROW simultaneously.)
+Move the cursor one word to the left.
+<DT>^RIGHTARROW [ ESC-w or ESC-RIGHTARROW ]<DD>
+(That is, CONTROL and RIGHTARROW simultaneously.)
+Move the cursor one word to the right.
+<DT>HOME [ ESC-0 ]<DD>
+Move the cursor to the beginning of the line.
+<DT>END [ ESC-$ ]<DD>
+Move the cursor to the end of the line.
+<DT>BACKSPACE<DD>
+Delete the character to the left of the cursor,
+or cancel the command if the command line is empty.
+<DT>DELETE or [ ESC-x ]<DD>
+Delete the character under the cursor.
+<DT>^BACKSPACE [ ESC-BACKSPACE ]<DD>
+(That is, CONTROL and BACKSPACE simultaneously.)
+Delete the word to the left of the cursor.
+<DT>^DELETE [ ESC-X or ESC-DELETE ]<DD>
+(That is, CONTROL and DELETE simultaneously.)
+Delete the word under the cursor.
+<DT>UPARROW [ ESC-k ]<DD>
+Retrieve the previous command line.
+<DT>DOWNARROW [ ESC-j ]<DD>
+Retrieve the next command line.
+<DT>TAB<DD>
+Complete the partial filename to the left of the cursor.
+If it matches more than one filename, the first match
+is entered into the command line.
+Repeated TABs will cycle thru the other matching filenames.
+If the completed filename is a directory, a &quot;/&quot; is appended to the filename.
+(On MS-DOS systems, a &quot;\&quot; is appended.)
+The environment variable LESSSEPARATOR can be used to specify a 
+different character to append to a directory name.
+<DT>BACKTAB [ ESC-TAB ]<DD>
+Like, TAB, but cycles in the reverse direction thru the matching filenames.
+<DT>^L<DD>
+Complete the partial filename to the left of the cursor.
+If it matches more than one filename, all matches are entered into
+the command line (if they fit).
+<DT>^U (Unix) or ESC (MS-DOS)<DD>
+Delete the entire command line,
+or cancel the command if the command line is empty.
+If you have changed your line-kill character in Unix to something
+other than ^U, that character is used instead of ^U.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>KEY BINDINGS</H2>
+
+You may define your own 
+<I>less</I>
+
+commands by using the program 
+<I>lesskey</I>
+
+(1)
+to create a lesskey file.
+This file specifies a set of command keys and an action
+associated with each key.
+You may also use
+<I>lesskey</I>
+
+to change the line-editing keys (see LINE EDITING),
+and to set environment variables.
+If the environment variable LESSKEY is set,
+<I>less</I>
+
+uses that as the name of the lesskey file.
+Otherwise, 
+<I>less</I>
+
+looks in a standard place for the lesskey file:
+On Unix systems,
+<I>less</I>
+
+looks for a lesskey file called &quot;$HOME/.less&quot;.
+On MS-DOS systems,
+<I>less</I>
+
+looks for a lesskey file called &quot;$HOME/_less&quot;, and if it is not found there,
+then looks for a lesskey file called &quot;_less&quot; in any directory specified
+in the PATH environment variable.
+On OS/2 systems,
+<I>less</I>
+
+looks for a lesskey file called &quot;$HOME/less.ini&quot;, and if it is not found,
+then looks for a lesskey file called &quot;less.ini&quot; in any directory specified
+in the INIT environment variable, and if it not found there,
+then looks for a lesskey file called &quot;less.ini&quot; in any directory specified
+in the PATH environment variable.
+See the
+<I>lesskey</I>
+
+manual page for more details.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>INPUT PREPROCESSOR</H2>
+
+You may define an &quot;input preprocessor&quot; for 
+<I>less.</I>
+
+Before
+<I>less</I>
+
+opens a file, it first gives your input preprocessor a chance to modify the
+way the contents of the file are displayed.
+An input preprocessor is simply an executable program (or shell script),
+which writes the contents of the file to a different file,
+called the replacement file.
+The contents of the replacement file are then displayed 
+in place of the contents of the original file.
+However, it will appear to the user as if the original file is opened;
+that is, 
+<I>less</I>
+
+will display the original filename as the name of the current file.
+<P>
+
+An input preprocessor receives one command line argument, the original filename,
+as entered by the user.
+It should create the replacement file, and when finished,
+print the name of the replacement file to its standard output.
+If the input preprocessor does not output a replacement filename, 
+<I>less</I>
+
+uses the original file, as normal.
+The input preprocessor is not called when viewing standard input.
+To set up an input preprocessor, set the LESSOPEN environment variable
+to a command line which will invoke your input preprocessor.
+This command line should include one occurrence of the string &quot;%s&quot;, 
+which will be replaced by the filename
+when the input preprocessor command is invoked.
+<P>
+
+When 
+<I>less</I>
+
+closes a file opened in such a way, it will call another program,
+called the input postprocessor,
+which may perform any desired clean-up action (such as deleting the
+replacement file created by LESSOPEN).
+This program receives two command line arguments, the original filename
+as entered by the user, and the name of the replacement file.
+To set up an input postprocessor, set the LESSCLOSE environment variable 
+to a command line which will invoke your input postprocessor.
+It may include two occurrences of the string &quot;%s&quot;; 
+the first is replaced with the original name of the file and 
+the second with the name of the replacement file, 
+which was output by LESSOPEN.
+<P>
+
+For example, on many Unix systems, these two scripts will allow you
+to keep files in compressed format, but still let
+<I>less</I>
+
+view them directly:
+<P>
+
+lessopen.sh:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#! /bin/sh<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>case &quot;$1&quot; in<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.Z)<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uncompress -c $1  &gt;/tmp/less.$$  2&gt;/dev/null<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>if [ -s /tmp/less.$$ ]; then <BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>echo /tmp/less.$$<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>else<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>rm -f /tmp/less.$$<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>fi<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>;;<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>esac<BR>
+<P>
+
+lessclose.sh:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#! /bin/sh<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>rm $2<BR>
+<P>
+
+To use these scripts, put them both where they can be executed and
+set LESSOPEN=&quot;lessopen.sh&nbsp;%s&quot;, and
+LESSCLOSE=&quot;lessclose.sh&nbsp;%s&nbsp;%s&quot;.
+More complex LESSOPEN and LESSCLOSE scripts may be written
+to accept other types of compressed files, and so on.
+<P>
+
+It is also possible to set up an input preprocessor to
+pipe the file data directly to 
+<I>less,</I>
+
+rather than putting the data into a replacement file.
+This avoids the need to decompress the entire file before 
+starting to view it.
+An input preprocessor that works this way is called an input pipe.
+An input pipe, instead of writing the name of a replacement file on
+its standard output,
+writes the entire contents of the replacement file on its standard output.
+If the input pipe does not write any characters on its standard output,
+then there is no replacement file and 
+<I>less</I>
+
+uses the original file, as normal.
+To use an input pipe,
+make the first character in the LESSOPEN environment variable a 
+vertical bar (|) to signify that the input preprocessor is an input pipe.
+<P>
+
+For example, on many Unix systems, this script will work like the
+previous example scripts:
+<P>
+
+lesspipe.sh:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#! /bin/sh<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>case &quot;$1&quot; in<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.Z)<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uncompress -c $1  2&gt;/dev/null<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>;;<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>esac<BR>
+<BR>
+
+<P>
+
+To use this script, put it where it can be executed and set
+LESSOPEN=&quot;|lesspipe.sh %s&quot;.
+When an input pipe is used, a LESSCLOSE postprocessor can be used,
+but it is usually not necessary since there is no replacement file
+to clean up.
+In this case, the replacement file name passed to the LESSCLOSE
+postprocessor is &quot;-&quot;.
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>NATIONAL CHARACTER SETS</H2>
+
+There are three types of characters in the input file:
+<DL COMPACT>
+<DT>normal characters<DD>
+can be displayed directly to the screen.
+<DT>control characters<DD>
+should not be displayed directly, but are expected to be found
+in ordinary text files (such as backspace and tab).
+<DT>binary characters<DD>
+should not be displayed directly and are not expected to be found
+in text files.
+</DL>
+<P>
+
+A &quot;character set&quot; is simply a description of which characters are to
+be considered normal, control, and binary.
+The LESSCHARSET environment variable may be used to select a character set.
+Possible values for LESSCHARSET are:
+<DL COMPACT>
+<DT>ascii<DD>
+The default character set.
+BS, TAB, NL, CR, and formfeed are control characters,
+all chars with values between 32 and 126 are normal,
+and all others are binary.
+<DT>iso8859<DD>
+Selects the ISO 8859/1 character set.
+latin-1 is the same as ASCII, except characters between 161 and 255 are
+treated as normal characters.
+<DT>latin1<DD>
+Same as iso8859.
+<DT>dos<DD>
+Selects a character set appropriate for MS-DOS.
+<DT>ebcdic<DD>
+Selects an EBCDIC character set.
+<DT>koi8-r<DD>
+Selects a Russian character set.
+<DT>next<DD>
+Selects a character set appropriate for NeXT computers.
+</DL>
+<P>
+
+In special cases, it may be desired to tailor
+<I>less</I>
+
+to use a character set other than the ones definable by LESSCHARSET.
+In this case, the environment variable LESSCHARDEF can be used
+to define a character set.
+It should be set to a string where each character in the string represents
+one character in the character set.
+The character &quot;.&quot; is used for a normal character, &quot;c&quot; for control,
+and &quot;b&quot; for binary.
+A decimal number may be used for repetition.
+For example, &quot;bccc4b.&quot; would mean character 0 is binary,
+1, 2 and 3 are control, 4, 5, 6 and 7 are binary, and 8 is normal.
+All characters after the last are taken to be the same as the last,
+so characters 9 through 255 would be normal.
+(This is an example, and does not necessarily 
+represent any real character set.)
+<P>
+
+This table shows the value of LESSCHARDEF which is equivalent
+to each of the possible values for LESSCHARSET:
+<P>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ascii&nbsp;<TT>&nbsp;&nbsp;</TT>8bcccbcc18b95.b<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>dos&nbsp;&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT>8bcccbcc12bc5b95.b.<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ebcdic<TT>&nbsp;&nbsp;</TT>5bc6bcc7bcc41b.9b7.9b5.b..8b6.10b6.b9.7b<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT>9.8b8.17b3.3b9.7b9.8b8.6b10.b.b.b.<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>iso8859<TT>&nbsp;</TT>8bcccbcc18b95.33b.<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>koi8-r<TT>&nbsp;&nbsp;</TT>8bcccbcc18b95.b128.<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>latin1<TT>&nbsp;&nbsp;</TT>8bcccbcc18b95.33b.<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>next&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT>8bcccbcc18b95.bb125.bb<BR>
+<P>
+
+If neither LESSCHARSET nor LESSCHARDEF is set, 
+but your system supports the 
+<I>setlocale</I>
+
+interface,
+<I>less</I>
+
+will use setlocale to determine the character set.
+setlocale is controlled by setting the LANG or LC_CTYPE environment variables.
+<P>
+
+Control and binary characters are displayed in standout (reverse video).
+Each such character is displayed in caret notation if possible
+(e.g. ^A for control-A).  Caret notation is used only if 
+inverting the 0100 bit results in a normal printable character.
+Otherwise, the character is displayed as a hex number in angle brackets.
+This format can be changed by 
+setting the LESSBINFMT environment variable.
+LESSBINFMT may begin with a &quot;*&quot; and one character to select 
+the display attribute:
+&quot;*k&quot; is blinking, &quot;*d&quot; is bold, &quot;*u&quot; is underlined, &quot;*s&quot; is standout,
+and &quot;*n&quot; is normal.
+If LESSBINFMT does not begin with a &quot;*&quot;, normal attribute is assumed.
+The remainder of LESSBINFMT is a string which may include one
+printf-style escape sequence (a % followed by x, X, o, d, etc.).
+For example, if LESSBINFMT is &quot;*u[%x]&quot;, binary characters
+are displayed in underlined hexadecimal surrounded by brackets.
+The default if no LESSBINFMT is specified is &quot;*s&lt;%X&gt;&quot;.
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>PROMPTS</H2>
+
+The -P option allows you to tailor the prompt to your preference.
+The string given to the -P option replaces the specified prompt string.
+Certain characters in the string are interpreted specially.
+The prompt mechanism is rather complicated to provide flexibility,
+but the ordinary user need not understand the details of constructing
+personalized prompt strings.
+<P>
+A percent sign followed by a single character is expanded
+according to what the following character is:
+<DL COMPACT>
+<DT>%b<I>X</I><DD>
+Replaced by the byte offset into the current input file.
+The b is followed by a single character (shown as <I>X</I> above)
+which specifies the line whose byte offset is to be used.
+If the character is a &quot;t&quot;, the byte offset of the top line in the
+display is used,
+an &quot;m&quot; means use the middle line,
+a &quot;b&quot; means use the bottom line,
+a &quot;B&quot; means use the line just after the bottom line,
+and a &quot;j&quot; means use the &quot;target&quot; line, as specified by the -j option.
+<DT>%B<DD>
+Replaced by the size of the current input file.
+<DT>%d<I>X</I><DD>
+Replaced by the page number of a line in the input file.
+The line to be used is determined by the <I>X</I>, as with the %b option.
+<DT>%D<DD>
+Replaced by the number of pages in the input file,
+or equivalently, the page number of the last line in the input file.
+<DT>%E<DD>
+Replaced by the name of the editor (from the VISUAL environment variable,
+or the EDITOR environment variable if VISUAL is not defined).
+See the discussion of the LESSEDIT feature below.
+<DT>%f<DD>
+Replaced by the name of the current input file.
+<DT>%i<DD>
+Replaced by the index of the current file in the list of
+input files.
+<DT>%l<I>X</I><DD>
+Replaced by the line number of a line in the input file.
+The line to be used is determined by the <I>X</I>, as with the %b option.
+<DT>%L<DD>
+Replaced by the line number of the last line in the input file.
+<DT>%m<DD>
+Replaced by the total number of input files.
+<DT>%p<I>X</I><DD>
+Replaced by the percent into the current input file.
+The line used is determined by the <I>X</I> as with the %b option.
+<DT>%s<DD>
+Same as %B.
+<DT>%t<DD>
+Causes any trailing spaces to be removed.
+Usually used at the end of the string, but may appear anywhere.
+<DT>%x<DD>
+Replaced by the name of the next input file in the list.
+</DL>
+<P>
+
+If any item is unknown (for example, the file size if input
+is a pipe), a question mark is printed instead.
+<P>
+
+The format of the prompt string can be changed
+depending on certain conditions.
+A question mark followed by a single character acts like an &quot;IF&quot;:
+depending on the following character, a condition is evaluated.
+If the condition is true, any characters following the question mark
+and condition character, up to a period, are included in the prompt.
+If the condition is false, such characters are not included.
+A colon appearing between the question mark and the
+period can be used to establish an &quot;ELSE&quot;: any characters between
+the colon and the period are included in the string if and only if
+the IF condition is false.
+Condition characters (which follow a question mark) may be:
+<DL COMPACT>
+<DT>?a<DD>
+True if any characters have been included in the prompt so far.
+<DT>?b<I>X</I><DD>
+True if the byte offset of the specified line is known.
+<DT>?B<DD>
+True if the size of current input file is known.
+<DT>?d<I>X</I><DD>
+True if the page number of the specified line is known.
+<DT>?e<DD>
+True if at end-of-file.
+<DT>?f<DD>
+True if there is an input filename
+(that is, if input is not a pipe).
+<DT>?l<I>X</I><DD>
+True if the line number of the specified line is known.
+<DT>?L<DD>
+True if the line number of the last line in the file is known.
+<DT>?m<DD>
+True if there is more than one input file.
+<DT>?n<DD>
+True if this is the first prompt in a new input file.
+<DT>?p<I>X</I><DD>
+True if the percent into the current input file
+of the specified line is known.
+<DT>?s<DD>
+Same as &quot;?B&quot;.
+<DT>?x<DD>
+True if there is a next input file
+(that is, if the current input file is not the last one).
+</DL>
+<P>
+
+Any characters other than the special ones
+(question mark, colon, period, percent, and backslash)
+become literally part of the prompt.
+Any of the special characters may be included in the prompt literally
+by preceding it with a backslash.
+<P>
+
+Some examples:
+<P>
+?f%f:Standard input.
+<P>
+This prompt prints the filename, if known;
+otherwise the string &quot;Standard input&quot;.
+<P>
+?f%f .?ltLine %lt:?pt%pt\%:?btByte %bt:-...
+<P>
+This prompt would print the filename, if known.
+The filename is followed by the line number, if known,
+otherwise the percent if known, otherwise the byte offset if known.
+Otherwise, a dash is printed.
+Notice how each question mark has a matching period,
+and how the % after the %pt
+is included literally by escaping it with a backslash.
+<P>
+?n?f%f&nbsp;.?m(file&nbsp;%i&nbsp;of&nbsp;%m)&nbsp;..?e(END)&nbsp;?x-&nbsp;Next\:&nbsp;%x..%t
+<P>
+This prints the filename if this is the first prompt in a file,
+followed by the &quot;file N of N&quot; message if there is more
+than one input file.
+Then, if we are at end-of-file, the string &quot;(END)&quot; is printed
+followed by the name of the next file, if there is one.
+Finally, any trailing spaces are truncated.
+This is the default prompt.
+For reference, here are the defaults for
+the other two prompts (-m and -M respectively).
+Each is broken into two lines here for readability only.
+<PRE>
+
+?n?f%f&nbsp;.?m(file&nbsp;%i&nbsp;of&nbsp;%m)&nbsp;..?e(END)&nbsp;?x-&nbsp;Next\:&nbsp;%x.:
+        ?pB%pB\%:byte&nbsp;%bB?s/%s...%t
+
+?f%f&nbsp;.?n?m(file&nbsp;%i&nbsp;of&nbsp;%m)&nbsp;..?ltline&nbsp;%lt?L/%L.&nbsp;:byte&nbsp;%bB?s/%s.&nbsp;.
+        ?e(END)&nbsp;?x-&nbsp;Next\:&nbsp;%x.:?pB%pB\%..%t
+
+</PRE>
+
+And here is the default message produced by the = command:
+<PRE>
+
+?f%f&nbsp;.?m(file&nbsp;%i&nbsp;of&nbsp;%m)&nbsp;.?ltline&nbsp;%lt?L/%L.&nbsp;.
+        byte&nbsp;%bB?s/%s.&nbsp;?e(END)&nbsp;:?pB%pB\%..%t
+</PRE>
+
+<P>
+
+The prompt expansion features are also used for another purpose:
+if an environment variable LESSEDIT is defined, it is used
+as the command to be executed when the v command is invoked.
+The LESSEDIT string is expanded in the same way as the prompt strings.
+The default value for LESSEDIT is:
+<PRE>
+
+        %E&nbsp;?lm+%lm.&nbsp;%f
+
+</PRE>
+
+Note that this expands to the editor name, followed by a + and the
+line number, followed by the file name.
+If your editor does not accept the &quot;+linenumber&quot; syntax, or has other
+differences in invocation syntax, the LESSEDIT variable can be 
+changed to modify this default.
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>SECURITY</H2>
+
+When the environment variable LESSSECURE is set to 1,
+<I>less</I>
+
+runs in a &quot;secure&quot; mode.
+This means these features are disabled:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>!<DD>
+the shell command
+<DT>|<DD>
+the pipe command
+<DT>:e<DD>
+the examine command.
+<DT>v<DD>
+the editing command
+<DT>s  -o<DD>
+log files
+<DT>-k<DD>
+use of lesskey files
+<DT>-t<DD>
+use of tags files
+<DT> <DD>
+metacharacters in filenames, such as *
+<DT> <DD>
+filename completion (TAB, ^L)
+</DL>
+</DL>
+
+<P>
+
+Less can also be compiled to be permanently in &quot;secure&quot; mode.
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>ENVIRONMENT VARIABLES</H2>
+
+Environment variables may be specified either in the system environment
+as usual, or in a 
+<I>lesskey</I>
+
+(1) file.
+<DL COMPACT>
+<DT>COLUMNS<DD>
+Sets the number of columns on the screen.
+Takes precedence over the number of columns specified by the TERM variable.
+(But if you have a windowing system which supports TIOCGWINSZ or WIOCGETD,
+the window system's idea of the screen size takes precedence over the
+LINES and COLUMNS environment variables.)
+<DT>EDITOR<DD>
+The name of the editor (used for the v command).
+<DT>HOME<DD>
+Name of the user's home directory (used to find a lesskey file on Unix systems).
+<DT>HOMEDRIVE, HOMEPATH<DD>
+Concatenation of the HOMEDRIVE and HOMEPATH environment variables is
+the name of the user's home directory if the HOME variable is not set
+(only in the Windows version).
+<DT>INIT<DD>
+Name of the user's init directory (used to find a lesskey file on OS/2 systems).
+<DT>LANG<DD>
+Language for determining the character set.
+<DT>LC_CTYPE<DD>
+Language for determining the character set.
+<DT>LESS<DD>
+Options which are passed to 
+<I>less</I>
+
+automatically.
+<DT>LESSBINFMT<DD>
+Format for displaying non-printable, non-control characters.
+<DT>LESSCHARDEF<DD>
+Defines a character set.
+<DT>LESSCHARSET<DD>
+Selects a predefined character set.
+<DT>LESSCLOSE<DD>
+Command line to invoke the (optional) input-postprocessor.
+<DT>LESSECHO<DD>
+Name of the lessecho program (default &quot;lessecho&quot;).
+The lessecho program is needed to expand metacharacters, such as * and ?,
+in filenames on Unix systems.
+<DT>LESSEDIT<DD>
+Editor prototype string (used for the v command).
+See discussion under PROMPTS.
+<DT>LESSKEY<DD>
+Name of the default <A HREF="./lesskey.html">lesskey</A>(1) file.
+<DT>LESSMETACHARS<DD>
+List of characters which are considered &quot;metacharacters&quot; by the shell.
+<DT>LESSMETAESCAPE<DD>
+Prefix which less will add before each metacharacter in a
+command sent to the shell.
+If LESSMETAESCAPE is an empty string, commands containing
+metacharacters will not be passed to the shell.
+<DT>LESSOPEN<DD>
+Command line to invoke the (optional) input-preprocessor.
+<DT>LESSSECURE<DD>
+Runs less in &quot;secure&quot; mode.
+See discussion under SECURITY.
+<DT>LESSSEPARATOR<DD>
+String to be appended to a directory name in filename completion.
+<DT>LINES<DD>
+Sets the number of lines on the screen.
+Takes precedence over the number of lines specified by the TERM variable.
+(But if you have a windowing system which supports TIOCGWINSZ or WIOCGETD,
+the window system's idea of the screen size takes precedence over the
+LINES and COLUMNS environment variables.)
+<DT>PATH<DD>
+User's search path (used to find a lesskey file 
+on MS-DOS and OS/2 systems).
+<DT>SHELL<DD>
+The shell used to execute the ! command, as well as to expand filenames.
+<DT>TERM<DD>
+The type of terminal on which
+<I>less</I>
+
+is being run.
+<DT>VISUAL<DD>
+The name of the editor (used for the v command).
+<P>
+</DL>
+<A NAME="lbAN">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<A HREF="./lesskey.html">lesskey</A>(1)
+<P>
+<A NAME="lbAO">&nbsp;</A>
+<H2>WARNINGS</H2>
+
+The = command and prompts (unless changed by -P)
+report the line number of the line at the top of the screen,
+but the byte and percent of the line at the bottom of the screen.
+<P>
+
+If the :e command is used to name more than one file,
+and one of the named files has been viewed previously,
+the new files may be entered into the list in an unexpected order.
+<P>
+
+On certain older terminals (the so-called &quot;magic cookie&quot; terminals),
+search highlighting will cause an erroneous display.
+On such terminals, search highlighting is disabled by default 
+to avoid possible problems.
+<P>
+
+In certain cases, when search highlighting is enabled and 
+a search pattern begins with a ^,
+more text than the matching string may be highlighted.
+(This problem does not occur when less is compiled to use the POSIX
+regular expression package.)
+<P>
+
+On some systems,
+<I>setlocale</I>
+
+claims that ASCII characters 0 thru 31 are control characters 
+rather than binary characters.
+This causes 
+<I>less </I>
+
+to treat some binary files as ordinary, non-binary files.
+To workaround this problem, set the environment variable
+LESSCHARSET to &quot;ascii&quot; (or whatever character set is appropriate).
+<P>
+
+The MS-DOS and Windows versions sometimes display incorrect
+highlighting when lines are longer than the screen width.
+<P>
+
+See <A HREF="http://www.flash.net/~marknu/less">http://www.flash.net/~marknu/less</A> for the latest list of known bugs in this
+version of less.
+<P>
+<A NAME="lbAP">&nbsp;</A>
+<H2>COPYRIGHT</H2>
+
+Copyright (C) 1999  Mark Nudelman
+<P>
+
+less is part of the GNU project and is free software;
+you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation;
+either version 2, or (at your option) any later version.
+<P>
+
+less is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+<P>
+
+You should have received a copy of the GNU General Public License 
+along with less; see the file COPYING.
+If not, write to the Free Software Foundation, 59 Temple Place,
+Suite 330, Boston, MA  02111-1307, USA.
+<P>
+<A NAME="lbAQ">&nbsp;</A>
+<H2>AUTHOR</H2>
+
+<P>
+
+Mark Nudelman &lt;<A HREF="mailto:marknu@flash.net">marknu@flash.net</A>&gt;
+<BR>
+
+Send bug reports or comments to the above address or to <A HREF="mailto:bug-less@gnu.org">bug-less@gnu.org</A>.
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">COMMANDS</A><DD>
+<DT><A HREF="#lbAF">OPTIONS</A><DD>
+<DT><A HREF="#lbAG">LINE EDITING</A><DD>
+<DT><A HREF="#lbAH">KEY BINDINGS</A><DD>
+<DT><A HREF="#lbAI">INPUT PREPROCESSOR</A><DD>
+<DT><A HREF="#lbAJ">NATIONAL CHARACTER SETS</A><DD>
+<DT><A HREF="#lbAK">PROMPTS</A><DD>
+<DT><A HREF="#lbAL">SECURITY</A><DD>
+<DT><A HREF="#lbAM">ENVIRONMENT VARIABLES</A><DD>
+<DT><A HREF="#lbAN">SEE ALSO</A><DD>
+<DT><A HREF="#lbAO">WARNINGS</A><DD>
+<DT><A HREF="#lbAP">COPYRIGHT</A><DD>
+<DT><A HREF="#lbAQ">AUTHOR</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="./index.html">man2html</A>,
+using the manual pages.<BR>
+Time: 23:18:01 GMT, January 29, 2001
+</BODY>
+</HTML>

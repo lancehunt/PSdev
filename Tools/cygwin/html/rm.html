@@ -1,0 +1,130 @@
+Content-type: text/html
+
+<HTML><HEAD><TITLE>Manpage of RM</TITLE>
+</HEAD><BODY>
+<H1>RM</H1>
+Section: FSF (1)<BR>Updated: November 1998<BR><A HREF="#index">Index</A>
+<A HREF="./index.html">Return to Main Contents</A><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+rm - remove files or directories
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>rm</B>
+
+[<I>OPTION</I>]...<I> FILE</I>...
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<P>
+
+This manual page
+documents the GNU version of
+<B>rm</B>.
+
+<B>rm</B>
+
+removes each specified file.  By default, it does not remove
+directories.
+
+If a file is unwritable, the standard input is a tty, and
+the <I>-f</I> or <I>--force</I> option is not given,
+<B>rm</B>
+
+prompts the user for whether to remove the file.  If the response
+does not begin with `y' or `Y', the file is skipped.
+<P>
+
+GNU
+<B>rm</B>,
+
+like every program that uses the getopt function to parse its
+arguments, lets you use the
+<I>--</I>
+
+option to indicate that all following arguments are non-options.  To
+remove a file called `-f' in the current directory, you could type
+either
+<DL COMPACT><DT><DD>
+rm -- -f
+</DL>
+
+or
+<DL COMPACT><DT><DD>
+rm ./-f
+</DL>
+
+The Unix
+<B>rm</B>
+
+program's use of a single `-' for this purpose predates the
+development of the getopt standard syntax.
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<P>
+
+Remove (unlink) the FILE(s).
+<DL COMPACT>
+<DT><B>-d</B>, <B>--directory</B><DD>
+unlink directory, even if non-empty (super-user only)
+<DT><B>-f</B>, <B>--force</B><DD>
+ignore nonexistent files, never prompt
+<DT><B>-i</B>, <B>--interactive</B><DD>
+prompt before any removal
+<DT><B>-r</B>, <B>-R</B>, <B>--recursive</B><DD>
+remove the contents of directories recursively
+<DT><B>-v</B>, <B>--verbose</B><DD>
+explain what is being done
+<DT><B>--help</B><DD>
+display this help and exit
+<DT><B>--version</B><DD>
+output version information and exit
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>REPORTING BUGS</H2>
+
+Report bugs to &lt;<A HREF="mailto:bug-fileutils@gnu.org">bug-fileutils@gnu.org</A>&gt;.
+<A NAME="lbAG">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+The full documentation for
+<B>rm</B>
+
+is maintained as a Texinfo manual.  If the
+<B>info</B>
+
+and
+<B>rm</B>
+
+programs are properly installed at your site, the command
+<DL COMPACT>
+<DT><DD>
+<B>info rm</B>
+
+</DL>
+<P>
+
+should give you access to the complete manual.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">REPORTING BUGS</A><DD>
+<DT><A HREF="#lbAG">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="./index.html">man2html</A>,
+using the manual pages.<BR>
+Time: 23:18:01 GMT, January 29, 2001
+</BODY>
+</HTML>
