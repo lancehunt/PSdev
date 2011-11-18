@@ -39,6 +39,7 @@ alias ex='vim -e'
 alias view='vim -R'
 alias rview='vim -RZ'
 alias gunzip='gzip -d'		#gzip/gunzip are the same 
+alias npm='c:/node/debug/npm.cmd'
 
 if [ -f $HOME/.bashrc ]; then
   . $HOME/.bashrc

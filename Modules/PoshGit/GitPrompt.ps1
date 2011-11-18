@@ -43,6 +43,8 @@ function Write-GitStatus($status) {
         $s = $global:GitPromptSettings
         
         $currentBranch = $status.Branch
+		
+		$host.ui.rawui.set_ForegroundColor("White");
         
         Write-Host $s.BeforeText -NoNewline -BackgroundColor $s.BeforeBackgroundColor -ForegroundColor $s.BeforeForegroundColor
         if ($status.AheadBy -eq 0) {
