@@ -1,7 +1,7 @@
-﻿#Powershell Dev Bundle#
+﻿##Powershell Dev Bundle##
 This is my stock powershell bundle for Windows 7 (64-bit) that combines many useful frameworks, utilities, and scripts for easy setup of a new dev environment.   The main focus is upon command-line tools hosted in the excellent Console utility.
 
-##Included Packages
+###Included Packages###
 
 - Powershell
 	- Psake (build tool)
@@ -20,7 +20,7 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 	- Console
 	- lessmsi
 
-## TODO ##
+### TODO ###
 
 - Complete work on PoSh TFS
 - Create script to auto-configure Git, Mercurial, TFS, etc
@@ -29,5 +29,5 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 	- Include Python, Perl, Ruby, Nodejs installs.
 - Decide how to handle pulling/pushing secure content such as proxy settings and logon/passwords as needed.
 	
-## References ##
+### References ###
 David Findley (xpando) https://bitbucket.org/xpando/powershell
