@@ -1,0 +1,48 @@
+[gui]
+[http]
+[gui]
+[user]
+[core]
+	editor = npp
+[alias]
+	purge = clean -xdf
+	st = status
+	co = checkout
+	graph = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all
+	sb = status -sb
+	today = log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative
+	ci = commit -a
+	fetcht = tfs fetch
+	pusht = tfs checkintool
+	ct = tfs checkintool
+	wip = "git add -A; git ls-files --deleted -z | xargs -0 git rm; git commit"
+	unwip = git log -n 1 | grep -q -c wip && git reset HEAD~1
+	rb = rebase
+	rbc = rebase --continue
+	sub = submodule update --init --recursive
+	recent = log --stat --since='3 Days Ago' --graph --pretty=oneline --abbrev-commit --date=relative --all
+[color]
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+
+[diff]
+    tool = kdiff3
+ 
+[merge]
+    tool = kdiff3
+ 
+[mergetool "kdiff3"]
+    path = C:/Program Files (x86)/KDiff3/kdiff3.exe
+    keepBackup = false
+    trustExitCode = false
+ 
+[difftool "kdiff3"]
+    path = C:/Program Files (x86)/KDiff3/kdiff3.exe
+    keepBackup = false
+    trustExitCode = false
+[mergetool]
+	keepBackup = false
+[http]
+	sslverify = false
