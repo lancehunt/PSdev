@@ -1,15 +1,11 @@
 ﻿$global:profile = $MyInvocation.MyCommand.Definition
-$profileDir = Split-Path -Parent $profile
+$profileDir = Split-Path $profile -Parent 
 Push-Location $profileDir
 
-Import-Module "$profileDir\Modules\Commands"
+Import-Module "$profileDir\Modules\Common" -DisableNameChecking
 Import-Module "$profileDir\Modules\PoshHg\Posh-Hg"
-Import-Module "$profileDir\Modules\PSake\Psake"
 
 Add-Path @(
-  "$profileDir\Scripts"
-  "$profileDir\Tools"
-  "$profileDir\Tools\tcc" 
   "$profileDir\Tools\TortoiseHg"
 )
 
@@ -50,4 +46,5 @@ $global:HgPromptSettings.BeforeForegroundColor = [ConsoleColor]::White
 $global:HgPromptSettings.BeforeTagText = ' at '
 
 Pop-Location
+Go-Home
 
