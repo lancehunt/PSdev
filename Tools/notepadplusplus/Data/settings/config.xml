@@ -95,7 +95,6 @@
     <FindHistory nbMaxFindHistoryPath="10" nbMaxFindHistoryFilter="10" nbMaxFindHistoryFind="10" nbMaxFindHistoryReplace="10" matchWord="no" matchCase="no" wrap="yes" directionDown="yes" fifRecuisive="yes" fifInHiddenFolder="no" dlgAlwaysVisible="no" fifFilterFollowsDoc="no" fifFolderFollowsDoc="no" searchMode="0" transparencyMode="1" transparency="150" />
     <History nbMaxFile="15" inSubMenu="no" customLength="-1">
         <File filename="C:\PS\Profile-Git.ps1" />
-        <File filename="C:\PS\Profile-Svn.ps1" />
         <File filename="C:\PS\Profile-Tfs.ps1" />
     </History>
     <ProjectPanels>
