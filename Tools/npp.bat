@@ -1,2 +1,2 @@
 @ECHO OFF 
-%~dp0"\notepadplusplus\notepad++Portable.exe" -noPlugins -nosession -notabbar -multiInst %1 
+%~dp0"\notepadplusplus\notepad++Portable.exe" -multiInst -noPlugins -nosession -notabbar %1 

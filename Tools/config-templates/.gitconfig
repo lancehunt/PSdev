@@ -3,7 +3,7 @@
 [gui]
 [user]
 [core]
-	editor = npp
+	editor = "c:/ps/tools/npp"
 [alias]
 	purge = clean -xdf
 	st = status
