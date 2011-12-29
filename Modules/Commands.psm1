@@ -102,6 +102,65 @@ function Test-TCPPort
 
 <# 
 .SYNOPSIS 
+   Finds an installed program by name via the Win32_Product definition.
+#>
+function Get-Program {
+  [CmdletBinding()] 
+  param ( 
+    [Parameter(Position=0, mandatory=$true)] 
+    [string] $name
+  ) 
+  
+  begin {
+	echo 'Searching for installed program: '  $name
+	echo 'This may take a bit...'
+  }
+  
+  process {
+	gwmi win32_product | ? {$_.name -match $name} | % { $classkey = "$_"; $classkey = $classkey.substring($classkey.indexof("IdentifyingNumber=")); }
+	
+	if($classkey) {
+		echo 'Found!' $name
+		return ([wmi]"Win32_Product.$classkey")
+	}
+	else {
+		echo 'Not found!'
+		return $null;
+	}
+  }
+}
+
+<# 
+.SYNOPSIS 
+   Uninstalls an installed program by name via the Win32_Product definition.
+#>
+function Uninstall-Program {
+  [CmdletBinding()] 
+  param ( 
+    [Parameter(Position=0, mandatory=$true)] 
+    [string] $name
+  ) 
+  
+  begin {
+	echo 'Uninstalling program: '  $name
+	echo 'This may take a bit...'
+  }
+  
+  process {
+	gwmi win32_product | ? {$_.name -match $name} | % { $classkey = "$_"; $classkey = $classkey.substring($classkey.indexof("IdentifyingNumber=")); }
+	
+	if($classkey) {
+		echo 'Found!' $name
+		([wmi]"Win32_Product.$classkey").uninstall()
+	}
+	else {
+		echo 'Not found!'
+	}
+  }
+}
+
+<# 
+.SYNOPSIS 
    Creates a Hash of a file and prints the hash   
 .DESCRIPTION 
     Uses System.Security.Cryptography.HashAlgorithm and members to create the hash 
