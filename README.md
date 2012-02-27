@@ -36,4 +36,7 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 - *Powershell* by David Findley (xpando) - https://bitbucket.org/xpando/powershell
 - *PoSh-git* by Keith Dahlby - https://github.com/dahlbyk/posh-git
 - *PoSh-hg* by Jeremy Skinner - https://github.com/JeremySkinner/posh-hg
-
+- *GnuOnWindows* by Brent Matzelle - https://github.com/bmatzelle/gow
+- *Console2* by Marko Bozikovic - http://sourceforge.net/projects/console/
+- *Notepad++* by Don Ho - http://notepad-plus-plus.org/
+- *Git-Tfs* by  Matt Burke, Sean M. Collins & ivan-danilov - https://github.com/git-tfs/git-tfs
