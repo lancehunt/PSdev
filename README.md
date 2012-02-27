@@ -4,16 +4,17 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 
 ###Included Packages###
 
+- Source Control
+	- msysGit
+	- Git-Tfs
+	- tortoiseHg
+	- SlikSvn
 - Powershell
 	- Psake (build tool)
 	- PoSh Git
 	- PoSh Hg
 	- PoSh Svn 
 	- PoSh Tfs (my experiment)
-- msysGit
-- Git-Tfs
-- tortoiseHg
-- SlikSvn
 - Utilities
 	- Notepad++
 	- NuGet
