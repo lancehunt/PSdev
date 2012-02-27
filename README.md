@@ -33,4 +33,7 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 - Decide how to handle pulling/pushing secure content such as proxy settings and logon/passwords as needed.
 	
 ### References ###
-David Findley (xpando) https://bitbucket.org/xpando/powershell
+- *Powershell* by David Findley (xpando) - https://bitbucket.org/xpando/powershell
+- *PoSh-git* by Keith Dahlby - https://github.com/dahlbyk/posh-git
+- *PoSh-hg* by Jeremy Skinner - https://github.com/JeremySkinner/posh-hg
+
