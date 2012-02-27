@@ -17,7 +17,7 @@ This is my stock powershell bundle for Windows 7 (64-bit) that combines many use
 - Utilities
 	- Notepad++
 	- NuGet
-	- cygwin
+	- GnuOnWindows
 	- Console
 	- lessmsi
 
