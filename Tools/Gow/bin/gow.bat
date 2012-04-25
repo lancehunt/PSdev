@@ -1,2 +1,2 @@
 @echo off 
-cscript //NoLogo "c:\PS\tools\Gow\bin\gow.vbs" %1
+cscript //NoLogo "c:\ps\Tools\Gow\bin\gow.vbs" %1
