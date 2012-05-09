@@ -1,6 +1,8 @@
 <NotepadPlus>
     <Session activeView="0">
-        <mainView activeIndex="0" />
+        <mainView activeIndex="1">
+            <File firstVisibleLine="236" xOffset="0" scrollWidth="1476" startPos="10710" endPos="10710" selMode="0" lang="Javascript" encoding="-1" filename="C:\M4\piranha\Dev\Dev\src\client\services\webapiStreaming.js" />
+        </mainView>
         <subView activeIndex="0" />
     </Session>
 </NotepadPlus>
