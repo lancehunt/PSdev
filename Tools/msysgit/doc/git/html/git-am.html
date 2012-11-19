@@ -587,7 +587,7 @@ git-am(1) Manual Page
          [--3way] [--interactive] [--committer-date-is-author-date]
          [--ignore-date] [--ignore-space-change | --ignore-whitespace]
          [--whitespace=&lt;option&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
-         [--exclude=&lt;path&gt;] [--reject] [-q | --quiet]
+         [--exclude=&lt;path&gt;] [--include=&lt;path&gt;] [--reject] [-q | --quiet]
          [--scissors | --no-scissors]
          [(&lt;mbox&gt; | &lt;Maildir&gt;)&#8230;]
 <em>git am</em> (--continue | --skip | --abort)</div>
@@ -634,6 +634,14 @@ current branch.</p></div>
 <dd>
 <p>
         Pass <tt>-k</tt> flag to <em>git mailinfo</em> (see <a href="git-mailinfo.html">git-mailinfo(1)</a>).
+</p>
+</dd>
+<dt class="hdlist1">
+--keep-non-patch
+</dt>
+<dd>
+<p>
+        Pass <tt>-b</tt> flag to <em>git mailinfo</em> (see <a href="git-mailinfo.html">git-mailinfo(1)</a>).
 </p>
 </dd>
 <dt class="hdlist1">
@@ -744,6 +752,9 @@ default.   You can use <tt>--no-utf8</tt> to override this.</p></div>
 </dt>
 <dt class="hdlist1">
 --exclude=&lt;path&gt;
+</dt>
+<dt class="hdlist1">
+--include=&lt;path&gt;
 </dt>
 <dt class="hdlist1">
 --reject
@@ -915,7 +926,7 @@ errors in the "From:" lines).</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-04-29 17:26:43 PDT
 </div>
 </div>
 </body>

@@ -10,7 +10,7 @@ SYNOPSIS
 --------
 [verse]
 'git push' [--all | --mirror | --tags] [-n | --dry-run] [--receive-pack=<git-receive-pack>]
-	   [--repo=<repository>] [-f | --force] [-v | --verbose] [-u | --set-upstream]
+	   [--repo=<repository>] [-f | --force] [--prune] [-v | --verbose] [-u | --set-upstream]
 	   [<repository> [<refspec>...]]
 
 DESCRIPTION
@@ -34,10 +34,12 @@ OPTIONS[[OPTIONS]]
 
 <refspec>...::
 	The format of a <refspec> parameter is an optional plus
-	`{plus}`, followed by the source ref <src>, followed
+	`+`, followed by the source ref <src>, followed
 	by a colon `:`, followed by the destination ref <dst>.
 	It is used to specify with what <src> object the <dst> ref
-	in the remote repository is to be updated.
+	in the remote repository is to be updated.  If not specified,
+	the behavior of the command is controlled by the `push.default`
+	configuration variable.
 +
 The <src> is often the name of the branch you would want to push, but
 it can be any arbitrary "SHA-1 expression", such as `master~4` or
@@ -50,7 +52,7 @@ updated.
 +
 The object referenced by <src> is used to update the <dst> reference
 on the remote side, but by default this is only allowed if the
-update can fast-forward <dst>.  By having the optional leading `{plus}`,
+update can fast-forward <dst>.  By having the optional leading `+`,
 you can tell git to update the <dst> ref even when the update is not a
 fast-forward.  This does *not* attempt to merge <src> into <dst>.  See
 EXAMPLES below for details.
@@ -60,16 +62,25 @@ EXAMPLES below for details.
 Pushing an empty <src> allows you to delete the <dst> ref from
 the remote repository.
 +
-The special refspec `:` (or `{plus}:` to allow non-fast-forward updates)
+The special refspec `:` (or `+:` to allow non-fast-forward updates)
 directs git to push "matching" branches: for every branch that exists on
 the local side, the remote side is updated if a branch of the same name
 already exists on the remote side.  This is the default operation mode
 if no explicit refspec is found (that is neither on the command line
-nor in any Push line of the corresponding remotes file---see below).
+nor in any Push line of the corresponding remotes file---see below) and
+no `push.default` configuration variable is set.
 
 --all::
 	Instead of naming each ref to push, specifies that all
 	refs under `refs/heads/` be pushed.
+
+--prune::
+	Remove remote branches that don't have a local counterpart. For example
+	a remote branch `tmp` will be removed if a local branch with the same
+	name doesn't exist any more. This also respects refspecs, e.g.
+	`git push --prune remote refs/heads/*:refs/tmp/*` would
+	make sure that remote `refs/tmp/foo` will be removed if `refs/heads/foo`
+	doesn't exist.
 
 --mirror::
 	Instead of naming each ref to push, specifies that all
@@ -162,10 +173,16 @@ useful if you write an alias or script around 'git push'.
 	is specified. This flag forces progress status even if the
 	standard error stream is not directed to a terminal.
 
---recurse-submodules=check::
-	Check whether all submodule commits used by the revisions to be
-	pushed are available on a remote tracking branch. Otherwise the
-	push will be aborted and the command will exit with non-zero status.
+--recurse-submodules=check|on-demand::
+	Make sure all submodule commits used by the revisions to be
+	pushed are available on a remote tracking branch. If 'check' is
+	used git will verify that all submodule commits that changed in
+	the revisions to be pushed are available on at least one remote
+	of the submodule. If any commits are missing the push will be
+	aborted and exit with non-zero status. If 'on-demand' is used
+	all submodules that changed in the revisions to be pushed will
+	be pushed. If on-demand was not able to push all necessary
+	revisions it will also be aborted and exit with non-zero status.
 
 
 include::urls-remotes.txt[]
@@ -196,7 +213,7 @@ option is used.
 flag::
 	A single character indicating the status of the ref:
 (space);; for a successfully pushed fast-forward;
-`{plus}`;; for a successful forced update;
+`+`;; for a successful forced update;
 `-`;; for a successfully deleted ref;
 `*`;; for a successfully pushed new ref;
 `!`;; for a ref that was rejected or failed to push; and
@@ -206,7 +223,7 @@ summary::
 	For a successfully pushed ref, the summary shows the old and new
 	values of the ref in a form suitable for using as an argument to
 	`git log` (this is `<old>..<new>` in most cases, and
-	`<old>\...<new>` for forced non-fast-forward updates).
+	`<old>...<new>` for forced non-fast-forward updates).
 +
 For a failed update, more details are given:
 +
@@ -343,7 +360,8 @@ Examples
 	`git push origin :`.
 +
 The default behavior of this command when no <refspec> is given can be
-configured by setting the `push` option of the remote.
+configured by setting the `push` option of the remote, or the `push.default`
+configuration variable.
 +
 For example, to default to pushing only the current branch to `origin`
 use `git config remote.origin.push HEAD`.  Any valid <refspec> (like
@@ -388,7 +406,7 @@ the ones in the examples below) can be configured as the default for
 	Find a ref that matches `experimental` in the `origin` repository
 	(e.g. `refs/heads/experimental`), and delete it.
 
-`git push origin {plus}dev:master`::
+`git push origin +dev:master`::
 	Update the origin repository's master branch with the dev branch,
 	allowing non-fast-forward updates.  *This can leave unreferenced
 	commits dangling in the origin repository.*  Consider the

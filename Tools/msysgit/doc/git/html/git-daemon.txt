@@ -16,6 +16,7 @@ SYNOPSIS
 	     [--reuseaddr] [--detach] [--pid-file=<file>]
 	     [--enable=<service>] [--disable=<service>]
 	     [--allow-override=<service>] [--forbid-override=<service>]
+	     [--access-hook=<path>]
 	     [--inetd | [--listen=<host_or_ipaddr>] [--port=<n>] [--user=<user> [--group=<group>]]
 	     [<directory>...]
 
@@ -161,6 +162,31 @@ the facility of inet daemon to achieve the same before spawning
 	repository configuration.  By default, all the services
 	are overridable.
 
+--informative-errors::
+--no-informative-errors::
+	When informative errors are turned on, git-daemon will report
+	more verbose errors to the client, differentiating conditions
+	like "no such repository" from "repository not exported". This
+	is more convenient for clients, but may leak information about
+	the existence of unexported repositories.  When informative
+	errors are not enabled, all errors report "access denied" to the
+	client. The default is --no-informative-errors.
+
+--access-hook=<path>::
+	Every time a client connects, first run an external command
+	specified by the <path> with service name (e.g. "upload-pack"),
+	path to the repository, hostname (%H), canonical hostname
+	(%CH), ip address (%IP), and tcp port (%P) as its command line
+	arguments. The external command can decide to decline the
+	service by exiting with a non-zero status (or to allow it by
+	exiting with a zero status).  It can also look at the $REMOTE_ADDR
+	and $REMOTE_PORT environment variables to learn about the
+	requestor when making this decision.
++
+The external command can optionally write a single line to its
+standard output to be sent to the requestor as an error message when
+it declines the service.
+
 <directory>::
 	A directory to add to the whitelist of allowed directories. Unless
 	--strict-paths is specified this will also include subdirectories
@@ -194,7 +220,7 @@ receive-pack::
 	can push anything into the repository, including removal
 	of refs).  This is solely meant for a closed LAN setting
 	where everybody is friendly.  This service can be
-	enabled by `daemon.receivepack` configuration item to
+	enabled by setting `daemon.receivepack` configuration item to
 	`true`.
 
 EXAMPLES

@@ -653,6 +653,10 @@ work tree (the further the directory that contains <tt>.gitattributes</tt>
 is from the path in question, the lower its precedence). Finally
 global and system-wide files are considered (they have the lowest
 precedence).</p></div>
+<div class="paragraph"><p>When the <tt>.gitattributes</tt> file is missing from the work tree, the
+path in the index is used as a fall-back.  During checkout process,
+<tt>.gitattributes</tt> in the index is used and then the file in the
+working tree is used as a fall-back.</p></div>
 <div class="paragraph"><p>If you wish to affect only a single repository (i.e., to assign
 attributes to files that are particular to
 one user&#8217;s workflow for that repository), then
@@ -662,6 +666,8 @@ repositories (i.e., attributes of interest to all users) should go into
 <tt>.gitattributes</tt> files. Attributes that should affect all repositories
 for a single user should be placed in a file specified by the
 <tt>core.attributesfile</tt> configuration option (see <a href="git-config.html">git-config(1)</a>).
+Its default value is $XDG_CONFIG_HOME/git/attributes. If $XDG_CONFIG_HOME
+is either not set or empty, $HOME/.config/git/attributes is used instead.
 Attributes for all users on a system should be placed in the
 <tt>$(prefix)/etc/gitattributes</tt> file.</p></div>
 <div class="paragraph"><p>Sometimes you would need to override an setting of an attribute
@@ -888,15 +894,24 @@ fed the blob object from its standard input, and its standard
 output is used to update the worktree file.  Similarly, the
 <tt>clean</tt> command is used to convert the contents of worktree file
 upon checkin.</p></div>
-<div class="paragraph"><p>A missing filter driver definition in the config is not an error
-but makes the filter a no-op passthru.</p></div>
-<div class="paragraph"><p>The content filtering is done to massage the content into a
-shape that is more convenient for the platform, filesystem, and
-the user to use.  The key phrase here is "more convenient" and not
-"turning something unusable into usable".  In other words, the
-intent is that if someone unsets the filter driver definition,
-or does not have the appropriate filter program, the project
-should still be usable.</p></div>
+<div class="paragraph"><p>One use of the content filtering is to massage the content into a shape
+that is more convenient for the platform, filesystem, and the user to use.
+For this mode of operation, the key phrase here is "more convenient" and
+not "turning something unusable into usable".  In other words, the intent
+is that if someone unsets the filter driver definition, or does not have
+the appropriate filter program, the project should still be usable.</p></div>
+<div class="paragraph"><p>Another use of the content filtering is to store the content that cannot
+be directly used in the repository (e.g. a UUID that refers to the true
+content stored outside git, or an encrypted content) and turn it into a
+usable form upon checkout (e.g. download the external content, or decrypt
+the encrypted content).</p></div>
+<div class="paragraph"><p>These two filters behave differently, and by default, a filter is taken as
+the former, massaging the contents into more convenient shape.  A missing
+filter driver definition in the config, or a filter driver that exits with
+a non-zero status, is not an error but makes the filter a no-op passthru.</p></div>
+<div class="paragraph"><p>You can declare that a filter turns a content that by itself is unusable
+into a usable content by setting the filter.&lt;driver&gt;.required configuration
+variable to <tt>true</tt>.</p></div>
 <div class="paragraph"><p>For example, in .gitattributes, you would assign the <tt>filter</tt>
 attribute for paths.</p></div>
 <div class="listingblock">
@@ -923,6 +938,15 @@ section on merging below.</p></div>
 input that is already correctly indented.  In this case, the lack of a
 smudge filter means that the clean filter <em>must</em> accept its own output
 without modifying it.</p></div>
+<div class="paragraph"><p>If a filter <em>must</em> succeed in order to make the stored contents usable,
+you can declare that the filter is <tt>required</tt>, in the configuration:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>[filter "crypt"]
+        clean = openssl enc ...
+        smudge = openssl enc -d ...
+        required</tt></pre>
+</div></div>
 <div class="paragraph"><p>Sequence "%f" on the filter command line is replaced with the name of
 the file the filter is working on.  A filter might use this in keyword
 substitution.  For example:</p></div>
@@ -1066,6 +1090,11 @@ patterns are available:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
+<tt>ada</tt> suitable for source code in the Ada language.
+</p>
+</li>
+<li>
+<p>
 <tt>bibtex</tt> suitable for files with BibTeX coded references.
 </p>
 </li>
@@ -1092,6 +1121,11 @@ patterns are available:</p></div>
 <li>
 <p>
 <tt>java</tt> suitable for source code in the Java language.
+</p>
+</li>
+<li>
+<p>
+<tt>matlab</tt> suitable for source code in the MATLAB language.
 </p>
 </li>
 <li>
@@ -1504,7 +1538,7 @@ file at the toplevel (i.e. not in any subdirectory).  The built-in
 macro attribute "binary" is equivalent to:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>[attr]binary -diff -text</tt></pre>
+<pre><tt>[attr]binary -diff -merge -text</tt></pre>
 </div></div>
 </div>
 <h2 id="_example">EXAMPLE</h2>
@@ -1575,7 +1609,7 @@ frotz   unspecified</tt></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-10-10 15:49:24 PDT
 </div>
 </div>
 </body>

@@ -9,11 +9,11 @@ git - the stupid content tracker
 SYNOPSIS
 --------
 [verse]
-'git' [--version] [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+'git' [--version] [--help] [-c <name>=<value>]
+    [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
     [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
     [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-    [-c <name>=<value>]
-    [--help] <command> [<args>]
+    <command> [<args>]
 
 DESCRIPTION
 -----------
@@ -22,18 +22,17 @@ unusually rich command set that provides both high-level operations
 and full access to internals.
 
 See linkgit:gittutorial[7] to get started, then see
-link:everyday.html[Everyday Git] for a useful minimum set of commands, and
-"man git-commandname" for documentation of each command.  CVS users may
-also want to read linkgit:gitcvs-migration[7].  See
-the link:user-manual.html[Git User's Manual] for a more in-depth
-introduction.
+link:everyday.html[Everyday Git] for a useful minimum set of
+commands.  The link:user-manual.html[Git User's Manual] has a more
+in-depth introduction.
 
-The '<command>' is either a name of a Git command (see below) or an alias
-as defined in the configuration file (see linkgit:git-config[1]).
+After you mastered the basic concepts, you can come back to this
+page to learn what commands git offers.  You can learn more about
+individual git commands with "git help command".  linkgit:gitcli[7]
+manual page gives you an overview of the command line command syntax.
 
-Formatted and hyperlinked version of the latest git
-documentation can be viewed at
-`http://www.kernel.org/pub/software/scm/git/docs/`.
+Formatted and hyperlinked version of the latest git documentation
+can be viewed at `http://git-htmldocs.googlecode.com/git/git.html`.
 
 ifdef::stalenotes[]
 [NOTE]
@@ -44,14 +43,82 @@ unreleased) version of git, that is available from 'master'
 branch of the `git.git` repository.
 Documentation for older releases are available here:
 
-* link:v1.7.7/git.html[documentation for release 1.7.7]
+* link:v1.8.0/git.html[documentation for release 1.8.0]
 
 * release notes for
+  link:RelNotes/1.8.0.txt[1.8.0],
+
+* link:v1.7.12.4/git.html[documentation for release 1.7.12.4]
+
+* release notes for
+  link:RelNotes/1.7.12.4.txt[1.7.12.4],
+  link:RelNotes/1.7.12.3.txt[1.7.12.3],
+  link:RelNotes/1.7.12.2.txt[1.7.12.2],
+  link:RelNotes/1.7.12.1.txt[1.7.12.1],
+  link:RelNotes/1.7.12.txt[1.7.12].
+
+* link:v1.7.11.7/git.html[documentation for release 1.7.11.7]
+
+* release notes for
+  link:RelNotes/1.7.11.7.txt[1.7.11.7],
+  link:RelNotes/1.7.11.6.txt[1.7.11.6],
+  link:RelNotes/1.7.11.5.txt[1.7.11.5],
+  link:RelNotes/1.7.11.4.txt[1.7.11.4],
+  link:RelNotes/1.7.11.3.txt[1.7.11.3],
+  link:RelNotes/1.7.11.2.txt[1.7.11.2],
+  link:RelNotes/1.7.11.1.txt[1.7.11.1],
+  link:RelNotes/1.7.11.txt[1.7.11].
+
+* link:v1.7.10.5/git.html[documentation for release 1.7.10.5]
+
+* release notes for
+  link:RelNotes/1.7.10.5.txt[1.7.10.5],
+  link:RelNotes/1.7.10.4.txt[1.7.10.4],
+  link:RelNotes/1.7.10.3.txt[1.7.10.3],
+  link:RelNotes/1.7.10.2.txt[1.7.10.2],
+  link:RelNotes/1.7.10.1.txt[1.7.10.1],
+  link:RelNotes/1.7.10.txt[1.7.10].
+
+* link:v1.7.9.7/git.html[documentation for release 1.7.9.7]
+
+* release notes for
+  link:RelNotes/1.7.9.7.txt[1.7.9.7],
+  link:RelNotes/1.7.9.6.txt[1.7.9.6],
+  link:RelNotes/1.7.9.5.txt[1.7.9.5],
+  link:RelNotes/1.7.9.4.txt[1.7.9.4],
+  link:RelNotes/1.7.9.3.txt[1.7.9.3],
+  link:RelNotes/1.7.9.2.txt[1.7.9.2],
+  link:RelNotes/1.7.9.1.txt[1.7.9.1],
+  link:RelNotes/1.7.9.txt[1.7.9].
+
+* link:v1.7.8.6/git.html[documentation for release 1.7.8.6]
+
+* release notes for
+  link:RelNotes/1.7.8.6.txt[1.7.8.6],
+  link:RelNotes/1.7.8.5.txt[1.7.8.5],
+  link:RelNotes/1.7.8.4.txt[1.7.8.4],
+  link:RelNotes/1.7.8.3.txt[1.7.8.3],
+  link:RelNotes/1.7.8.2.txt[1.7.8.2],
+  link:RelNotes/1.7.8.1.txt[1.7.8.1],
+  link:RelNotes/1.7.8.txt[1.7.8].
+
+* link:v1.7.7.7/git.html[documentation for release 1.7.7.7]
+
+* release notes for
+  link:RelNotes/1.7.7.7.txt[1.7.7.7],
+  link:RelNotes/1.7.7.6.txt[1.7.7.6],
+  link:RelNotes/1.7.7.5.txt[1.7.7.5],
+  link:RelNotes/1.7.7.4.txt[1.7.7.4],
+  link:RelNotes/1.7.7.3.txt[1.7.7.3],
+  link:RelNotes/1.7.7.2.txt[1.7.7.2],
+  link:RelNotes/1.7.7.1.txt[1.7.7.1],
   link:RelNotes/1.7.7.txt[1.7.7].
 
-* link:v1.7.6.4/git.html[documentation for release 1.7.6.4]
+* link:v1.7.6.6/git.html[documentation for release 1.7.6.6]
 
 * release notes for
+  link:RelNotes/1.7.6.6.txt[1.7.6.6],
+  link:RelNotes/1.7.6.5.txt[1.7.6.5],
   link:RelNotes/1.7.6.4.txt[1.7.6.4],
   link:RelNotes/1.7.6.3.txt[1.7.6.3],
   link:RelNotes/1.7.6.2.txt[1.7.6.2],
@@ -353,24 +420,6 @@ help ...`.
 	Do not use replacement refs to replace git objects. See
 	linkgit:git-replace[1] for more information.
 
-
-FURTHER DOCUMENTATION
----------------------
-
-See the references above to get started using git.  The following is
-probably more detail than necessary for a first-time user.
-
-The link:user-manual.html#git-concepts[git concepts chapter of the
-user-manual] and linkgit:gitcore-tutorial[7] both provide
-introductions to the underlying git architecture.
-
-See linkgit:gitworkflows[7] for an overview of recommended workflows.
-
-See also the link:howto-index.html[howto] documents for some useful
-examples.
-
-The internals are documented in the
-link:technical/api-index.html[GIT API documentation].
 
 GIT COMMANDS
 ------------
@@ -685,6 +734,12 @@ other
 	a pager.  See also the `core.pager` option in
 	linkgit:git-config[1].
 
+'GIT_EDITOR'::
+	This environment variable overrides `$EDITOR` and `$VISUAL`.
+	It is used by several git commands when, on interactive mode,
+	an editor is to be launched. See also linkgit:git-var[1]
+	and the `core.editor` option in linkgit:git-config[1].
+
 'GIT_SSH'::
 	If this environment variable is set then 'git fetch'
 	and 'git push' will use this command instead
@@ -784,6 +839,29 @@ content stored in the index.
 The index is also capable of storing multiple entries (called "stages")
 for a given pathname.  These stages are used to hold the various
 unmerged version of a file when a merge is in progress.
+
+FURTHER DOCUMENTATION
+---------------------
+
+See the references in the "description" section to get started
+using git.  The following is probably more detail than necessary
+for a first-time user.
+
+The link:user-manual.html#git-concepts[git concepts chapter of the
+user-manual] and linkgit:gitcore-tutorial[7] both provide
+introductions to the underlying git architecture.
+
+See linkgit:gitworkflows[7] for an overview of recommended workflows.
+
+See also the link:howto-index.html[howto] documents for some useful
+examples.
+
+The internals are documented in the
+link:technical/api-index.html[GIT API documentation].
+
+Users migrating from CVS may also want to
+read linkgit:gitcvs-migration[7].
+
 
 Authors
 -------

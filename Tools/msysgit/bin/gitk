@@ -2,20 +2,45 @@
 # Tcl ignores the next line -*- tcl -*- \
 exec wish "$0" -- "$@"
 
-# Copyright © 2005-2009 Paul Mackerras.  All rights reserved.
+# Copyright © 2005-2011 Paul Mackerras.  All rights reserved.
 # This program is free software; it may be used, copied, modified
 # and distributed under the terms of the GNU General Public Licence,
 # either version 2, or (at your option) any later version.
 
 package require Tk
 
-proc gitdir {} {
-    global env
-    if {[info exists env(GIT_DIR)]} {
-	return $env(GIT_DIR)
-    } else {
-	return [exec git rev-parse --git-dir]
+proc hasworktree {} {
+    return [expr {[exec git rev-parse --is-bare-repository] == "false" &&
+		  [exec git rev-parse --is-inside-git-dir] == "false"}]
+}
+
+proc reponame {} {
+    global gitdir
+    set n [file normalize $gitdir]
+    if {[string match "*/.git" $n]} {
+	set n [string range $n 0 end-5]
     }
+    return [file tail $n]
+}
+
+proc gitworktree {} {
+    variable _gitworktree
+    if {[info exists _gitworktree]} {
+	return $_gitworktree
+    }
+    # v1.7.0 introduced --show-toplevel to return the canonical work-tree
+    if {[catch {set _gitworktree [exec git rev-parse --show-toplevel]}]} {
+        # try to set work tree from environment, core.worktree or use
+        # cdup to obtain a relative path to the top of the worktree. If
+        # run from the top, the ./ prefix ensures normalize expands pwd.
+        if {[catch { set _gitworktree $env(GIT_WORK_TREE) }]} {
+	    catch {set _gitworktree [exec git config --get core.worktree]}
+	    if {$_gitworktree eq ""} {
+		set _gitworktree [file normalize ./[exec git rev-parse --show-cdup]]
+	    }
+        }
+    }
+    return $_gitworktree
 }
 
 # A simple scheduler for compute-intensive stuff.
@@ -468,11 +493,11 @@ proc updatecommits {} {
     global viewactive viewcomplete tclencoding
     global startmsecs showneartags showlocalchanges
     global mainheadid viewmainheadid viewmainheadid_orig pending_select
-    global isworktree
+    global hasworktree
     global varcid vposids vnegids vflags vrevs
     global show_notes
 
-    set isworktree [expr {[exec git rev-parse --is-inside-work-tree] == "true"}]
+    set hasworktree [hasworktree]
     rereadrefs
     set view $curview
     if {$mainheadid ne $viewmainheadid_orig($view)} {
@@ -616,11 +641,15 @@ proc varcinit {view} {
 
 proc resetvarcs {view} {
     global varcid varccommits parents children vseedcount ordertok
+    global vshortids
 
     foreach vid [array names varcid $view,*] {
 	unset varcid($vid)
 	unset children($vid)
 	unset parents($vid)
+    }
+    foreach vid [array names vshortids $view,*] {
+	unset vshortids($vid)
     }
     # some commits might have children but haven't been seen yet
     foreach vid [array names children $view,*] {
@@ -659,7 +688,7 @@ proc newvarc {view id} {
 	if {![info exists commitinfo($id)]} {
 	    parsecommit $id $commitdata($id) 1
 	}
-	set cdate [lindex $commitinfo($id) 4]
+	set cdate [lindex [lindex $commitinfo($id) 4] 0]
 	if {![string is integer -strict $cdate]} {
 	    set cdate 0
 	}
@@ -908,7 +937,7 @@ proc fix_reversal {p a v} {
 proc insertrow {id p v} {
     global cmitlisted children parents varcid varctok vtokmod
     global varccommits ordertok commitidx numcommits curview
-    global targetid targetrow
+    global targetid targetrow vshortids
 
     readcommit $id
     set vid $v,$id
@@ -917,6 +946,7 @@ proc insertrow {id p v} {
     set parents($vid) [list $p]
     set a [newvarc $v $id]
     set varcid($vid) $a
+    lappend vshortids($v,[string range $id 0 3]) $id
     if {[string compare [lindex $varctok($v) $a] $vtokmod($v)] < 0} {
 	modify_arc $v $a
     }
@@ -1372,7 +1402,7 @@ proc getcommitlines {fd inst view updating}  {
     global commitidx commitdata vdatemode
     global parents children curview hlview
     global idpending ordertok
-    global varccommits varcid varctok vtokmod vfilelimit
+    global varccommits varcid varctok vtokmod vfilelimit vshortids
 
     set stuff [read $fd 500000]
     # git log doesn't terminate the last commit with a null...
@@ -1471,6 +1501,8 @@ proc getcommitlines {fd inst view updating}  {
 	}
 	set id [lindex $ids 0]
 	set vid $view,$id
+
+	lappend vshortids($view,[string range $id 0 3]) $id
 
 	if {!$listed && $updating && ![info exists varcid($vid)] &&
 	    $vfilelimit($view) ne {}} {
@@ -1621,7 +1653,7 @@ proc readcommit {id} {
 }
 
 proc parsecommit {id contents listed} {
-    global commitinfo cdate
+    global commitinfo
 
     set inhdr 1
     set comment {}
@@ -1641,10 +1673,10 @@ proc parsecommit {id contents listed} {
 	set line [split $line " "]
 	set tag [lindex $line 0]
 	if {$tag == "author"} {
-	    set audate [lindex $line end-1]
+	    set audate [lrange $line end-1 end]
 	    set auname [join [lrange $line 1 end-2] " "]
 	} elseif {$tag == "committer"} {
-	    set comdate [lindex $line end-1]
+	    set comdate [lrange $line end-1 end]
 	    set comname [join [lrange $line 1 end-2] " "]
 	}
     }
@@ -1671,11 +1703,9 @@ proc parsecommit {id contents listed} {
 	}
 	set comment $newcomment
     }
-    if {$comdate != {}} {
-	set cdate($id) $comdate
-    }
+    set hasnote [string first "\nNotes:\n" $contents]
     set commitinfo($id) [list $headline $auname $audate \
-			     $comname $comdate $comment]
+			     $comname $comdate $comment $hasnote]
 }
 
 proc getcommit {id} {
@@ -1696,11 +1726,26 @@ proc getcommit {id} {
 # and are present in the current view.
 # This is fairly slow...
 proc longid {prefix} {
-    global varcid curview
+    global varcid curview vshortids
 
     set ids {}
-    foreach match [array names varcid "$curview,$prefix*"] {
-	lappend ids [lindex [split $match ","] 1]
+    if {[string length $prefix] >= 4} {
+	set vshortid $curview,[string range $prefix 0 3]
+	if {[info exists vshortids($vshortid)]} {
+	    foreach id $vshortids($vshortid) {
+		if {[string match "$prefix*" $id]} {
+		    if {[lsearch -exact $ids $id] < 0} {
+			lappend ids $id
+			if {[llength $ids] >= 2} break
+		    }
+		}
+	    }
+	}
+    } else {
+	foreach match [array names varcid "$curview,$prefix*"] {
+	    lappend ids [lindex [split $match ","] 1]
+	    if {[llength $ids] >= 2} break
+	}
     }
     return $ids
 }
@@ -1993,7 +2038,7 @@ proc makewindow {} {
     set file {
 	mc "File" cascade {
 	    {mc "Update" command updatecommits -accelerator F5}
-	    {mc "Reload" command reloadcommits -accelerator Meta1-F5}
+	    {mc "Reload" command reloadcommits -accelerator Shift-F5}
 	    {mc "Reread references" command rereadrefs}
 	    {mc "List references" command showrefs -accelerator F2}
 	    {xx "" separator}
@@ -2437,9 +2482,9 @@ proc makewindow {} {
     bindkey n "selnextline 1"
     bindkey z "goback"
     bindkey x "goforw"
-    bindkey i "selnextline -1"
-    bindkey k "selnextline 1"
-    bindkey j "goback"
+    bindkey k "selnextline -1"
+    bindkey j "selnextline 1"
+    bindkey h "goback"
     bindkey l "goforw"
     bindkey b prevfile
     bindkey d "$ctext yview scroll 18 units"
@@ -2450,7 +2495,7 @@ proc makewindow {} {
     bindkey ? {dofind -1 1}
     bindkey f nextfile
     bind . <F5> updatecommits
-    bind . <$M1B-F5> reloadcommits
+    bind . <Shift-F5> reloadcommits
     bind . <F2> showrefs
     bind . <Shift-F4> {newview 0}
     catch { bind . <Shift-Key-XF86_Switch_VT_4> {newview 0} }
@@ -2497,6 +2542,8 @@ proc makewindow {} {
 	{mc "Return to mark" command gotomark}
 	{mc "Find descendant of this and mark" command find_common_desc}
 	{mc "Compare with marked commit" command compare_commits}
+	{mc "Diff this -> marked commit" command {diffvsmark 0}}
+	{mc "Diff marked commit -> this" command {diffvsmark 1}}
     }
     $rowctxmenu configure -tearoff 0
 
@@ -2505,6 +2552,8 @@ proc makewindow {} {
 	{mc "Diff this -> selected" command {diffvssel 0}}
 	{mc "Diff selected -> this" command {diffvssel 1}}
 	{mc "Make patch" command mkpatch}
+	{mc "Diff this -> marked commit" command {diffvsmark 0}}
+	{mc "Diff marked commit -> this" command {diffvsmark 1}}
     }
     $fakerowmenu configure -tearoff 0
 
@@ -2815,7 +2864,7 @@ proc about {} {
     message $w.m -text [mc "
 Gitk - a commit viewer for git
 
-Copyright \u00a9 2005-2010 Paul Mackerras
+Copyright \u00a9 2005-2011 Paul Mackerras
 
 Use and redistribute under the terms of the GNU General Public License"] \
 	    -justify center -aspect 400 -border 2 -bg white -relief groove
@@ -2850,9 +2899,9 @@ proc keys {} {
 [mc "<%s-W>		Close window" $M1T]
 [mc "<Home>		Move to first commit"]
 [mc "<End>		Move to last commit"]
-[mc "<Up>, p, i	Move up one commit"]
-[mc "<Down>, n, k	Move down one commit"]
-[mc "<Left>, z, j	Go back in history list"]
+[mc "<Up>, p, k	Move up one commit"]
+[mc "<Down>, n, j	Move down one commit"]
+[mc "<Left>, z, h	Go back in history list"]
 [mc "<Right>, x, l	Go forward in history list"]
 [mc "<PageUp>	Move up one page in commit list"]
 [mc "<PageDown>	Move down one page in commit list"]
@@ -3333,8 +3382,7 @@ proc gitknewtmpdir {} {
     global diffnum gitktmpdir gitdir
 
     if {![info exists gitktmpdir]} {
-	set gitktmpdir [file join [file dirname $gitdir] \
-			    [format ".gitk-tmp.%s" [pid]]]
+	set gitktmpdir [file join $gitdir [format ".gitk-tmp.%s" [pid]]]
 	if {[catch {file mkdir $gitktmpdir} err]} {
 	    error_popup "[mc "Error creating temporary directory %s:" $gitktmpdir] $err"
 	    unset gitktmpdir
@@ -3366,10 +3414,10 @@ proc save_file_from_commit {filename output what} {
 
 proc external_diff_get_one_file {diffid filename diffdir} {
     global nullid nullid2 nullfile
-    global gitdir
+    global worktree
 
     if {$diffid == $nullid} {
-        set difffile [file join [file dirname $gitdir] $filename]
+        set difffile [file join $worktree $filename]
 	if {[file exists $difffile]} {
 	    return $difffile
 	}
@@ -3559,7 +3607,7 @@ proc make_relative {f} {
 }
 
 proc external_blame {parent_idx {line {}}} {
-    global flist_menu_file gitdir
+    global flist_menu_file cdup
     global nullid nullid2
     global parentlist selectedline currentid
 
@@ -3578,7 +3626,7 @@ proc external_blame {parent_idx {line {}}} {
     if {$line ne {} && $line > 1} {
 	lappend cmdline "--line=$line"
     }
-    set f [file join [file dirname $gitdir] $flist_menu_file]
+    set f [file join $cdup $flist_menu_file]
     # Unfortunately it seems git gui blame doesn't like
     # being given an absolute path...
     set f [make_relative $f]
@@ -3591,7 +3639,7 @@ proc external_blame {parent_idx {line {}}} {
 proc show_line_source {} {
     global cmitmode currentid parents curview blamestuff blameinst
     global diff_menu_line diff_menu_filebase flist_menu_file
-    global nullid nullid2 gitdir
+    global nullid nullid2 gitdir cdup
 
     set from_index {}
     if {$cmitmode eq "tree"} {
@@ -3644,7 +3692,7 @@ proc show_line_source {} {
     } else {
 	lappend blameargs $id
     }
-    lappend blameargs -- [file join [file dirname $gitdir] $flist_menu_file]
+    lappend blameargs -- [file join $cdup $flist_menu_file]
     if {[catch {
 	set f [open $blameargs r]
     } err]} {
@@ -4529,12 +4577,22 @@ proc makepatterns {l} {
 
 proc do_file_hl {serial} {
     global highlight_files filehighlight highlight_paths gdttype fhl_list
+    global cdup findtype
 
     if {$gdttype eq [mc "touching paths:"]} {
+	# If "exact" match then convert backslashes to forward slashes.
+	# Most useful to support Windows-flavoured file paths.
+	if {$findtype eq [mc "Exact"]} {
+	    set highlight_files [string map {"\\" "/"} $highlight_files]
+	}
 	if {[catch {set paths [shellsplit $highlight_files]}]} return
 	set highlight_paths [makepatterns $paths]
 	highlight_filelist
-	set gdtargs [concat -- $paths]
+	set relative_paths {}
+	foreach path $paths {
+	    lappend relative_paths [file join $cdup $path]
+	}
+	set gdtargs [concat -- $relative_paths]
     } elseif {$gdttype eq [mc "adding/removing string:"]} {
 	set gdtargs [list "-S$highlight_files"]
     } else {
@@ -4627,8 +4685,9 @@ proc askfindhighlight {row id} {
     }
     set info $commitinfo($id)
     set isbold 0
-    set fldtypes [list [mc Headline] [mc Author] [mc Date] [mc Committer] [mc CDate] [mc Comments]]
+    set fldtypes [list [mc Headline] [mc Author] "" [mc Committer] "" [mc Comments]]
     foreach f $info ty $fldtypes {
+	if {$ty eq ""} continue
 	if {($findloc eq [mc "All fields"] || $findloc eq $ty) &&
 	    [doesmatch $f]} {
 	    if {$ty eq [mc "Author"]} {
@@ -5031,9 +5090,9 @@ proc dohidelocalchanges {} {
 # spawn off a process to do git diff-index --cached HEAD
 proc dodiffindex {} {
     global lserial showlocalchanges vfilelimit curview
-    global isworktree
+    global hasworktree
 
-    if {!$showlocalchanges || !$isworktree} return
+    if {!$showlocalchanges || !$hasworktree} return
     incr lserial
     set cmd "|git diff-index --cached HEAD"
     if {$vfilelimit($curview) ne {}} {
@@ -5899,6 +5958,9 @@ proc drawcmittext {id row col} {
 	|| [info exists idotherrefs($id)]} {
 	set xt [drawtags $id $x $xt $y]
     }
+    if {[lindex $commitinfo($id) 6] > 0} {
+	set xt [drawnotesign $xt $y]
+    }
     set headline [lindex $commitinfo($id) 0]
     set name [lindex $commitinfo($id) 1]
     set date [lindex $commitinfo($id) 2]
@@ -6345,6 +6407,17 @@ proc drawtags {id x xt y1} {
     return $xt
 }
 
+proc drawnotesign {xt y} {
+    global linespc canv fgcolor
+
+    set orad [expr {$linespc / 3}]
+    set t [$canv create rectangle [expr {$xt - $orad}] [expr {$y - $orad}] \
+	       [expr {$xt + $orad - 1}] [expr {$y + $orad - 1}] \
+	       -fill yellow -outline $fgcolor -width 1 -tags circle]
+    set xt [expr {$xt + $orad * 3}]
+    return $xt
+}
+
 proc xcoord {i level ln} {
     global canvx0 xspc1 xspc2
 
@@ -6475,7 +6548,7 @@ proc findmore {} {
     if {![info exists find_dirn]} {
 	return 0
     }
-    set fldtypes [list [mc "Headline"] [mc "Author"] [mc "Date"] [mc "Committer"] [mc "CDate"] [mc "Comments"]]
+    set fldtypes [list [mc "Headline"] [mc "Author"] "" [mc "Committer"] "" [mc "Comments"]]
     set l $findcurline
     set moretodo 0
     if {$find_dirn > 0} {
@@ -6536,6 +6609,7 @@ proc findmore {} {
 	    }
 	    set info $commitinfo($id)
 	    foreach f $info ty $fldtypes {
+		if {$ty eq ""} continue
 		if {($findloc eq [mc "All fields"] || $findloc eq $ty) &&
 		    [doesmatch $f]} {
 		    set found 1
@@ -6688,7 +6762,7 @@ proc appendwithlinks {text tags} {
 
     set start [$ctext index "end - 1c"]
     $ctext insert end $text $tags
-    set links [regexp -indices -all -inline {\m[0-9a-f]{6,40}\M} $text]
+    set links [regexp -indices -all -inline {(?:\m|-g)[0-9a-f]{6,40}\M} $text]
     foreach l $links {
 	set s [lindex $l 0]
 	set e [lindex $l 1]
@@ -6703,6 +6777,10 @@ proc appendwithlinks {text tags} {
 
 proc setlink {id lk} {
     global curview ctext pendinglinks
+
+    if {[string range $id 0 1] eq "-g"} {
+      set id [string range $id 2 end]
+    }
 
     set known 0
     if {[string length $id] < 40} {
@@ -7251,7 +7329,7 @@ proc gettreeline {gtf id} {
 	if {[string index $fname 0] eq "\""} {
 	    set fname [lindex $fname 0]
 	}
-	set fname [encoding convertfrom $fname]
+	set fname [encoding convertfrom utf-8 $fname]
 	lappend treefilelist($id) $fname
     }
     if {![eof $gtf]} {
@@ -7376,19 +7454,15 @@ proc startdiff {ids} {
     }
 }
 
+# If the filename (name) is under any of the passed filter paths
+# then return true to include the file in the listing.
 proc path_filter {filter name} {
+    set worktree [gitworktree]
     foreach p $filter {
-	set l [string length $p]
-	if {[string index $p end] eq "/"} {
-	    if {[string compare -length $l $p $name] == 0} {
-		return 1
-	    }
-	} else {
-	    if {[string compare -length $l $p $name] == 0 &&
-		([string length $name] == $l ||
-		 [string index $name $l] eq "/")} {
-		return 1
-	    }
+	set fq_p [file normalize $p]
+	set fq_n [file normalize [file join $worktree $name]]
+	if {[string match [file normalize $fq_p]* $fq_n]} {
+	    return 1
 	}
     }
     return 0
@@ -7402,7 +7476,7 @@ proc addtocflist {ids} {
 }
 
 proc diffcmd {ids flags} {
-    global nullid nullid2
+    global log_showroot nullid nullid2
 
     set i [lsearch -exact $ids $nullid]
     set j [lsearch -exact $ids $nullid2]
@@ -7436,6 +7510,9 @@ proc diffcmd {ids flags} {
 	    lappend cmd HEAD
 	}
     } else {
+	if {$log_showroot} {
+	    lappend flags --root
+	}
 	set cmd [concat | git diff-tree -r $flags $ids]
     }
     return $cmd
@@ -7474,7 +7551,7 @@ proc gettreediffline {gdtf ids} {
 	    if {[string index $file 0] eq "\""} {
 		set file [lindex $file 0]
 	    }
-	    set file [encoding convertfrom $file]
+	    set file [encoding convertfrom utf-8 $file]
 	    if {$file ne [lindex $treediff end]} {
 		lappend treediff $file
 		lappend sublist $file
@@ -7623,7 +7700,7 @@ proc makediffhdr {fname ids} {
     global ctext curdiffstart treediffs diffencoding
     global ctext_file_names jump_to_here targetline diffline
 
-    set fname [encoding convertfrom $fname]
+    set fname [encoding convertfrom utf-8 $fname]
     set diffencoding [get_path_encoding $fname]
     set i [lsearch -exact $treediffs($ids) $fname]
     if {$i >= 0} {
@@ -7657,7 +7734,7 @@ proc getblobdiffline {bdf ids} {
 	}
 	if {![string compare -length 5 "diff " $line]} {
 	    if {![regexp {^diff (--cc|--git) } $line m type]} {
-		set line [encoding convertfrom $line]
+		set line [encoding convertfrom utf-8 $line]
 		$ctext insert end "$line\n" hunksep
 		continue
 	    }
@@ -7704,7 +7781,7 @@ proc getblobdiffline {bdf ids} {
 	    makediffhdr $fname $ids
 
 	} elseif {![string compare -length 16 "* Unmerged path " $line]} {
-	    set fname [encoding convertfrom [string range $line 16 end]]
+	    set fname [encoding convertfrom utf-8 [string range $line 16 end]]
 	    $ctext insert end "\n"
 	    set curdiffstart [$ctext index "end - 1c"]
 	    lappend ctext_file_names $fname
@@ -7759,7 +7836,7 @@ proc getblobdiffline {bdf ids} {
 		if {[string index $fname 0] eq "\""} {
 		    set fname [lindex $fname 0]
 		}
-		set fname [encoding convertfrom $fname]
+		set fname [encoding convertfrom utf-8 $fname]
 		set i [lsearch -exact $treediffs($ids) $fname]
 		if {$i >= 0} {
 		    setinlist difffilestart $i $curdiffstart
@@ -7778,6 +7855,7 @@ proc getblobdiffline {bdf ids} {
 		set diffinhdr 0
 		continue
 	    }
+	    set line [encoding convertfrom utf-8 $line]
 	    $ctext insert end "$line\n" filesep
 
 	} else {
@@ -8425,6 +8503,11 @@ proc rowmenu {x y id} {
     } else {
 	set state normal
     }
+    if {[info exists markedid] && $markedid ne $id} {
+	set mstate normal
+    } else {
+	set mstate disabled
+    }
     if {$id ne $nullid && $id ne $nullid2} {
 	set menu $rowctxmenu
 	if {$mainhead ne {}} {
@@ -8432,21 +8515,17 @@ proc rowmenu {x y id} {
 	} else {
 	    $menu entryconfigure 7 -label [mc "Detached head: can't reset" $mainhead] -state disabled
 	}
-	if {[info exists markedid] && $markedid ne $id} {
-	    $menu entryconfigure 9 -state normal
-	    $menu entryconfigure 10 -state normal
-	    $menu entryconfigure 11 -state normal
-	} else {
-	    $menu entryconfigure 9 -state disabled
-	    $menu entryconfigure 10 -state disabled
-	    $menu entryconfigure 11 -state disabled
-	}
+	$menu entryconfigure 9 -state $mstate
+	$menu entryconfigure 10 -state $mstate
+	$menu entryconfigure 11 -state $mstate
     } else {
 	set menu $fakerowmenu
     }
     $menu entryconfigure [mca "Diff this -> selected"] -state $state
     $menu entryconfigure [mca "Diff selected -> this"] -state $state
     $menu entryconfigure [mca "Make patch"] -state $state
+    $menu entryconfigure [mca "Diff this -> marked commit"] -state $mstate
+    $menu entryconfigure [mca "Diff marked commit -> this"] -state $mstate
     tk_popup $menu $x $y
 }
 
@@ -8645,6 +8724,21 @@ proc diffvssel {dirn} {
     } else {
 	set oldid $rowmenuid
 	set newid [commitonrow $selectedline]
+    }
+    addtohistory [list doseldiff $oldid $newid] savectextpos
+    doseldiff $oldid $newid
+}
+
+proc diffvsmark {dirn} {
+    global rowmenuid markedid
+
+    if {![info exists markedid]} return
+    if {$dirn} {
+	set oldid $markedid
+	set newid $rowmenuid
+    } else {
+	set oldid $rowmenuid
+	set newid $markedid
     }
     addtohistory [list doseldiff $oldid $newid] savectextpos
     doseldiff $oldid $newid
@@ -9043,6 +9137,7 @@ proc exec_citool {tool_args {baseid {}}} {
 proc cherrypick {} {
     global rowmenuid curview
     global mainhead mainheadid
+    global gitdir
 
     set oldhead [exec git rev-parse HEAD]
     set dheads [descheads $rowmenuid]
@@ -9071,7 +9166,7 @@ proc cherrypick {} {
 			conflict.\nDo you wish to run git citool to\
 			resolve it?"]]} {
 		# Force citool to read MERGE_MSG
-		file delete [file join [gitdir] "GITGUI_MSG"]
+		file delete [file join $gitdir "GITGUI_MSG"]
 		exec_citool {} $rowmenuid
 	    }
 	} else {
@@ -9437,6 +9532,7 @@ proc refill_reflist {} {
 proc getallcommits {} {
     global allcommits nextarc seeds allccache allcwait cachedarcs allcupdate
     global idheads idtags idotherrefs allparents tagobjid
+    global gitdir
 
     if {![info exists allcommits]} {
 	set nextarc 0
@@ -9444,7 +9540,7 @@ proc getallcommits {} {
 	set seeds {}
 	set allcwait 0
 	set cachedarcs 0
-	set allccache [file join [gitdir] "gitk.cache"]
+	set allccache [file join $gitdir "gitk.cache"]
 	if {![catch {
 	    set f [open $allccache r]
 	    set allcwait 1
@@ -10520,7 +10616,7 @@ proc movedhead {hid head} {
 }
 
 proc changedrefs {} {
-    global cached_dheads cached_dtags cached_atags
+    global cached_dheads cached_dtags cached_atags cached_tagcontent
     global arctags archeads arcnos arcout idheads idtags
 
     foreach id [concat [array names idheads] [array names idtags]] {
@@ -10532,6 +10628,7 @@ proc changedrefs {} {
 	    }
 	}
     }
+    catch {unset cached_tagcontent}
     catch {unset cached_dtags}
     catch {unset cached_atags}
     catch {unset cached_dheads}
@@ -10584,7 +10681,7 @@ proc listrefs {id} {
 }
 
 proc showtag {tag isnew} {
-    global ctext tagcontents tagids linknum tagobjid
+    global ctext cached_tagcontent tagids linknum tagobjid
 
     if {$isnew} {
 	addtohistory [list showtag $tag 0] savectextpos
@@ -10593,13 +10690,13 @@ proc showtag {tag isnew} {
     clear_ctext
     settabs 0
     set linknum 0
-    if {![info exists tagcontents($tag)]} {
+    if {![info exists cached_tagcontent($tag)]} {
 	catch {
-           set tagcontents($tag) [exec git cat-file tag $tag]
+           set cached_tagcontent($tag) [exec git cat-file tag $tag]
 	}
     }
-    if {[info exists tagcontents($tag)]} {
-	set text $tagcontents($tag)
+    if {[info exists cached_tagcontent($tag)]} {
+	set text $cached_tagcontent($tag)
     } else {
 	set text "[mc "Tag"]: $tag\n[mc "Id"]:  $tagids($tag)"
     }
@@ -10716,7 +10813,7 @@ proc fontok {} {
     if {$fontparam(slant) eq "italic"} {
 	lappend fontpref($f) "italic"
     }
-    set w $prefstop.$f
+    set w $prefstop.notebook.fonts.$f
     $w conf -text $fontparam(family) -font $fontpref($f)
 
     fontcan
@@ -10770,6 +10867,139 @@ proc chg_fontparam {v sub op} {
     font config sample -$sub $fontparam($sub)
 }
 
+# Create a property sheet tab page
+proc create_prefs_page {w} {
+    global NS
+    set parent [join [lrange [split $w .] 0 end-1] .]
+    if {[winfo class $parent] eq "TNotebook"} {
+	${NS}::frame $w
+    } else {
+	${NS}::labelframe $w
+    }
+}
+
+proc prefspage_general {notebook} {
+    global NS maxwidth maxgraphpct showneartags showlocalchanges
+    global tabstop limitdiffs autoselect autosellen extdifftool perfile_attrs
+    global hideremotes want_ttk have_ttk
+
+    set page [create_prefs_page $notebook.general]
+
+    ${NS}::label $page.ldisp -text [mc "Commit list display options"]
+    grid $page.ldisp - -sticky w -pady 10
+    ${NS}::label $page.spacer -text " "
+    ${NS}::label $page.maxwidthl -text [mc "Maximum graph width (lines)"]
+    spinbox $page.maxwidth -from 0 -to 100 -width 4 -textvariable maxwidth
+    grid $page.spacer $page.maxwidthl $page.maxwidth -sticky w
+    ${NS}::label $page.maxpctl -text [mc "Maximum graph width (% of pane)"]
+    spinbox $page.maxpct -from 1 -to 100 -width 4 -textvariable maxgraphpct
+    grid x $page.maxpctl $page.maxpct -sticky w
+    ${NS}::checkbutton $page.showlocal -text [mc "Show local changes"] \
+	-variable showlocalchanges
+    grid x $page.showlocal -sticky w
+    ${NS}::checkbutton $page.autoselect -text [mc "Auto-select SHA1 (length)"] \
+	-variable autoselect
+    spinbox $page.autosellen -from 1 -to 40 -width 4 -textvariable autosellen
+    grid x $page.autoselect $page.autosellen -sticky w
+    ${NS}::checkbutton $page.hideremotes -text [mc "Hide remote refs"] \
+	-variable hideremotes
+    grid x $page.hideremotes -sticky w
+
+    ${NS}::label $page.ddisp -text [mc "Diff display options"]
+    grid $page.ddisp - -sticky w -pady 10
+    ${NS}::label $page.tabstopl -text [mc "Tab spacing"]
+    spinbox $page.tabstop -from 1 -to 20 -width 4 -textvariable tabstop
+    grid x $page.tabstopl $page.tabstop -sticky w
+    ${NS}::checkbutton $page.ntag -text [mc "Display nearby tags"] \
+	-variable showneartags
+    grid x $page.ntag -sticky w
+    ${NS}::checkbutton $page.ldiff -text [mc "Limit diffs to listed paths"] \
+	-variable limitdiffs
+    grid x $page.ldiff -sticky w
+    ${NS}::checkbutton $page.lattr -text [mc "Support per-file encodings"] \
+	-variable perfile_attrs
+    grid x $page.lattr -sticky w
+
+    ${NS}::entry $page.extdifft -textvariable extdifftool
+    ${NS}::frame $page.extdifff
+    ${NS}::label $page.extdifff.l -text [mc "External diff tool" ]
+    ${NS}::button $page.extdifff.b -text [mc "Choose..."] -command choose_extdiff
+    pack $page.extdifff.l $page.extdifff.b -side left
+    pack configure $page.extdifff.l -padx 10
+    grid x $page.extdifff $page.extdifft -sticky ew
+
+    ${NS}::label $page.lgen -text [mc "General options"]
+    grid $page.lgen - -sticky w -pady 10
+    ${NS}::checkbutton $page.want_ttk -variable want_ttk \
+	-text [mc "Use themed widgets"]
+    if {$have_ttk} {
+	${NS}::label $page.ttk_note -text [mc "(change requires restart)"]
+    } else {
+	${NS}::label $page.ttk_note -text [mc "(currently unavailable)"]
+    }
+    grid x $page.want_ttk $page.ttk_note -sticky w
+    return $page
+}
+
+proc prefspage_colors {notebook} {
+    global NS uicolor bgcolor fgcolor ctext diffcolors selectbgcolor markbgcolor
+
+    set page [create_prefs_page $notebook.colors]
+
+    ${NS}::label $page.cdisp -text [mc "Colors: press to choose"]
+    grid $page.cdisp - -sticky w -pady 10
+    label $page.ui -padx 40 -relief sunk -background $uicolor
+    ${NS}::button $page.uibut -text [mc "Interface"] \
+       -command [list choosecolor uicolor {} $page.ui [mc "interface"] setui]
+    grid x $page.uibut $page.ui -sticky w
+    label $page.bg -padx 40 -relief sunk -background $bgcolor
+    ${NS}::button $page.bgbut -text [mc "Background"] \
+	-command [list choosecolor bgcolor {} $page.bg [mc "background"] setbg]
+    grid x $page.bgbut $page.bg -sticky w
+    label $page.fg -padx 40 -relief sunk -background $fgcolor
+    ${NS}::button $page.fgbut -text [mc "Foreground"] \
+	-command [list choosecolor fgcolor {} $page.fg [mc "foreground"] setfg]
+    grid x $page.fgbut $page.fg -sticky w
+    label $page.diffold -padx 40 -relief sunk -background [lindex $diffcolors 0]
+    ${NS}::button $page.diffoldbut -text [mc "Diff: old lines"] \
+	-command [list choosecolor diffcolors 0 $page.diffold [mc "diff old lines"] \
+		      [list $ctext tag conf d0 -foreground]]
+    grid x $page.diffoldbut $page.diffold -sticky w
+    label $page.diffnew -padx 40 -relief sunk -background [lindex $diffcolors 1]
+    ${NS}::button $page.diffnewbut -text [mc "Diff: new lines"] \
+	-command [list choosecolor diffcolors 1 $page.diffnew [mc "diff new lines"] \
+		      [list $ctext tag conf dresult -foreground]]
+    grid x $page.diffnewbut $page.diffnew -sticky w
+    label $page.hunksep -padx 40 -relief sunk -background [lindex $diffcolors 2]
+    ${NS}::button $page.hunksepbut -text [mc "Diff: hunk header"] \
+	-command [list choosecolor diffcolors 2 $page.hunksep \
+		      [mc "diff hunk header"] \
+		      [list $ctext tag conf hunksep -foreground]]
+    grid x $page.hunksepbut $page.hunksep -sticky w
+    label $page.markbgsep -padx 40 -relief sunk -background $markbgcolor
+    ${NS}::button $page.markbgbut -text [mc "Marked line bg"] \
+	-command [list choosecolor markbgcolor {} $page.markbgsep \
+		      [mc "marked line background"] \
+		      [list $ctext tag conf omark -background]]
+    grid x $page.markbgbut $page.markbgsep -sticky w
+    label $page.selbgsep -padx 40 -relief sunk -background $selectbgcolor
+    ${NS}::button $page.selbgbut -text [mc "Select bg"] \
+	-command [list choosecolor selectbgcolor {} $page.selbgsep [mc "background"] setselbg]
+    grid x $page.selbgbut $page.selbgsep -sticky w
+    return $page
+}
+
+proc prefspage_fonts {notebook} {
+    global NS
+    set page [create_prefs_page $notebook.fonts]
+    ${NS}::label $page.cfont -text [mc "Fonts: press to choose"]
+    grid $page.cfont - -sticky w -pady 10
+    mkfontdisp mainfont $page [mc "Main font"]
+    mkfontdisp textfont $page [mc "Diff display font"]
+    mkfontdisp uifont $page [mc "User interface font"]
+    return $page
+}
+
 proc doprefs {} {
     global maxwidth maxgraphpct use_ttk NS
     global oldprefs prefstop showneartags showlocalchanges
@@ -10790,106 +11020,38 @@ proc doprefs {} {
     ttk_toplevel $top
     wm title $top [mc "Gitk preferences"]
     make_transient $top .
-    ${NS}::label $top.ldisp -text [mc "Commit list display options"]
-    grid $top.ldisp - -sticky w -pady 10
-    ${NS}::label $top.spacer -text " "
-    ${NS}::label $top.maxwidthl -text [mc "Maximum graph width (lines)"]
-    spinbox $top.maxwidth -from 0 -to 100 -width 4 -textvariable maxwidth
-    grid $top.spacer $top.maxwidthl $top.maxwidth -sticky w
-    ${NS}::label $top.maxpctl -text [mc "Maximum graph width (% of pane)"]
-    spinbox $top.maxpct -from 1 -to 100 -width 4 -textvariable maxgraphpct
-    grid x $top.maxpctl $top.maxpct -sticky w
-    ${NS}::checkbutton $top.showlocal -text [mc "Show local changes"] \
-	-variable showlocalchanges
-    grid x $top.showlocal -sticky w
-    ${NS}::checkbutton $top.autoselect -text [mc "Auto-select SHA1 (length)"] \
-	-variable autoselect
-    spinbox $top.autosellen -from 1 -to 40 -width 4 -textvariable autosellen
-    grid x $top.autoselect $top.autosellen -sticky w
-    ${NS}::checkbutton $top.hideremotes -text [mc "Hide remote refs"] \
-	-variable hideremotes
-    grid x $top.hideremotes -sticky w
 
-    ${NS}::label $top.ddisp -text [mc "Diff display options"]
-    grid $top.ddisp - -sticky w -pady 10
-    ${NS}::label $top.tabstopl -text [mc "Tab spacing"]
-    spinbox $top.tabstop -from 1 -to 20 -width 4 -textvariable tabstop
-    grid x $top.tabstopl $top.tabstop -sticky w
-    ${NS}::checkbutton $top.ntag -text [mc "Display nearby tags"] \
-	-variable showneartags
-    grid x $top.ntag -sticky w
-    ${NS}::checkbutton $top.ldiff -text [mc "Limit diffs to listed paths"] \
-	-variable limitdiffs
-    grid x $top.ldiff -sticky w
-    ${NS}::checkbutton $top.lattr -text [mc "Support per-file encodings"] \
-	-variable perfile_attrs
-    grid x $top.lattr -sticky w
-
-    ${NS}::entry $top.extdifft -textvariable extdifftool
-    ${NS}::frame $top.extdifff
-    ${NS}::label $top.extdifff.l -text [mc "External diff tool" ]
-    ${NS}::button $top.extdifff.b -text [mc "Choose..."] -command choose_extdiff
-    pack $top.extdifff.l $top.extdifff.b -side left
-    pack configure $top.extdifff.l -padx 10
-    grid x $top.extdifff $top.extdifft -sticky ew
-
-    ${NS}::label $top.lgen -text [mc "General options"]
-    grid $top.lgen - -sticky w -pady 10
-    ${NS}::checkbutton $top.want_ttk -variable want_ttk \
-	-text [mc "Use themed widgets"]
-    if {$have_ttk} {
-	${NS}::label $top.ttk_note -text [mc "(change requires restart)"]
+    if {[set use_notebook [expr {$use_ttk && [info command ::ttk::notebook] ne ""}]]} {
+	set notebook [ttk::notebook $top.notebook]
     } else {
-	${NS}::label $top.ttk_note -text [mc "(currently unavailable)"]
+	set notebook [${NS}::frame $top.notebook -borderwidth 0 -relief flat]
     }
-    grid x $top.want_ttk $top.ttk_note -sticky w
 
-    ${NS}::label $top.cdisp -text [mc "Colors: press to choose"]
-    grid $top.cdisp - -sticky w -pady 10
-    label $top.ui -padx 40 -relief sunk -background $uicolor
-    ${NS}::button $top.uibut -text [mc "Interface"] \
-       -command [list choosecolor uicolor {} $top.ui [mc "interface"] setui]
-    grid x $top.uibut $top.ui -sticky w
-    label $top.bg -padx 40 -relief sunk -background $bgcolor
-    ${NS}::button $top.bgbut -text [mc "Background"] \
-	-command [list choosecolor bgcolor {} $top.bg [mc "background"] setbg]
-    grid x $top.bgbut $top.bg -sticky w
-    label $top.fg -padx 40 -relief sunk -background $fgcolor
-    ${NS}::button $top.fgbut -text [mc "Foreground"] \
-	-command [list choosecolor fgcolor {} $top.fg [mc "foreground"] setfg]
-    grid x $top.fgbut $top.fg -sticky w
-    label $top.diffold -padx 40 -relief sunk -background [lindex $diffcolors 0]
-    ${NS}::button $top.diffoldbut -text [mc "Diff: old lines"] \
-	-command [list choosecolor diffcolors 0 $top.diffold [mc "diff old lines"] \
-		      [list $ctext tag conf d0 -foreground]]
-    grid x $top.diffoldbut $top.diffold -sticky w
-    label $top.diffnew -padx 40 -relief sunk -background [lindex $diffcolors 1]
-    ${NS}::button $top.diffnewbut -text [mc "Diff: new lines"] \
-	-command [list choosecolor diffcolors 1 $top.diffnew [mc "diff new lines"] \
-		      [list $ctext tag conf dresult -foreground]]
-    grid x $top.diffnewbut $top.diffnew -sticky w
-    label $top.hunksep -padx 40 -relief sunk -background [lindex $diffcolors 2]
-    ${NS}::button $top.hunksepbut -text [mc "Diff: hunk header"] \
-	-command [list choosecolor diffcolors 2 $top.hunksep \
-		      [mc "diff hunk header"] \
-		      [list $ctext tag conf hunksep -foreground]]
-    grid x $top.hunksepbut $top.hunksep -sticky w
-    label $top.markbgsep -padx 40 -relief sunk -background $markbgcolor
-    ${NS}::button $top.markbgbut -text [mc "Marked line bg"] \
-	-command [list choosecolor markbgcolor {} $top.markbgsep \
-		      [mc "marked line background"] \
-		      [list $ctext tag conf omark -background]]
-    grid x $top.markbgbut $top.markbgsep -sticky w
-    label $top.selbgsep -padx 40 -relief sunk -background $selectbgcolor
-    ${NS}::button $top.selbgbut -text [mc "Select bg"] \
-	-command [list choosecolor selectbgcolor {} $top.selbgsep [mc "background"] setselbg]
-    grid x $top.selbgbut $top.selbgsep -sticky w
+    lappend pages [prefspage_general $notebook] [mc "General"]
+    lappend pages [prefspage_colors $notebook] [mc "Colors"]
+    lappend pages [prefspage_fonts $notebook] [mc "Fonts"]
+    set col 0
+    foreach {page title} $pages {
+	if {$use_notebook} {
+	    $notebook add $page -text $title
+	} else {
+	    set btn [${NS}::button $notebook.b_[string map {. X} $page] \
+			 -text $title -command [list raise $page]]
+	    $page configure -text $title
+	    grid $btn -row 0 -column [incr col] -sticky w
+	    grid $page -row 1 -column 0 -sticky news -columnspan 100
+	}
+    }
 
-    ${NS}::label $top.cfont -text [mc "Fonts: press to choose"]
-    grid $top.cfont - -sticky w -pady 10
-    mkfontdisp mainfont $top [mc "Main font"]
-    mkfontdisp textfont $top [mc "Diff display font"]
-    mkfontdisp uifont $top [mc "User interface font"]
+    if {!$use_notebook} {
+	grid columnconfigure $notebook 0 -weight 1
+	grid rowconfigure $notebook 1 -weight 1
+	raise [lindex $pages 0]
+    }
+
+    grid $notebook -sticky news -padx 2 -pady 2
+    grid rowconfigure $top 0 -weight 1
+    grid columnconfigure $top 0 -weight 1
 
     ${NS}::frame $top.buts
     ${NS}::button $top.buts.ok -text [mc "OK"] -command prefsok -default active
@@ -10901,7 +11063,7 @@ proc doprefs {} {
     grid columnconfigure $top.buts 1 -weight 1 -uniform a
     grid $top.buts - - -pady 10 -sticky ew
     grid columnconfigure $top 2 -weight 1
-    bind $top <Visibility> "focus $top.buts.ok"
+    bind $top <Visibility> [list focus $top.buts.ok]
 }
 
 proc choose_extdiff {} {
@@ -11040,7 +11202,7 @@ proc prefsok {} {
 proc formatdate {d} {
     global datetimeformat
     if {$d ne {}} {
-	set d [clock format $d -format $datetimeformat]
+	set d [clock format [lindex $d 0] -format $datetimeformat]
     }
     return $d
 }
@@ -11360,7 +11522,7 @@ proc cache_gitattr {attr pathlist} {
 	    foreach row [split $rlist "\n"] {
 		if {[regexp "(.*): $attr: (.*)" $row m path value]} {
 		    if {[string index $path 0] eq "\""} {
-			set path [encoding convertfrom [lindex $path 0]]
+			set path [encoding convertfrom utf-8 [lindex $path 0]]
 		    }
 		    set path_attr_cache($attr,$path) $value
 		}
@@ -11386,6 +11548,11 @@ if {[catch {package require Tk 8.4} err]} {
     show_error {} . "Sorry, gitk cannot run with this version of Tcl/Tk.\n\
 		     Gitk requires at least Tcl/Tk 8.4." list
     exit 1
+}
+
+# Unset GIT_TRACE var if set
+if { [info exists ::env(GIT_TRACE)] } {
+    unset ::env(GIT_TRACE)
 }
 
 # defaults...
@@ -11419,10 +11586,20 @@ catch {
     }
 }
 
+set log_showroot true
+catch {
+    set log_showroot [exec git config --bool --get log.showroot]
+}
+
 if {[tk windowingsystem] eq "aqua"} {
     set mainfont {{Lucida Grande} 9}
     set textfont {Monaco 9}
     set uifont {{Lucida Grande} 9 bold}
+} elseif {![catch {::tk::pkgconfig get fontsystem} xft] && $xft eq "xft"} {
+    # fontconfig!
+    set mainfont {sans 9}
+    set textfont {monospace 9}
+    set uifont {sans 9 bold}
 } else {
     set mainfont {Helvetica 9}
     set textfont {Courier 9}
@@ -11493,7 +11670,6 @@ if { [info exists ::env(GITK_MSGSDIR)] } {
     set gitk_prefix [file dirname [file dirname [file normalize $argv0]]]
     set gitk_libdir [file join $gitk_prefix share gitk lib]
     set gitk_msgsdir [file join $gitk_libdir msgs]
-    unset gitk_prefix
 }
 
 ## Internationalization (i18n) through msgcat and gettext. See
@@ -11521,12 +11697,8 @@ setui $uicolor
 setoptions
 
 # check that we can find a .git directory somewhere...
-if {[catch {set gitdir [gitdir]}]} {
+if {[catch {set gitdir [exec git rev-parse --git-dir]}]} {
     show_error {} . [mc "Cannot find a git repository here."]
-    exit 1
-}
-if {![file isdirectory $gitdir]} {
-    show_error {} . [mc "Cannot find the git directory \"%s\"." $gitdir]
     exit 1
 }
 
@@ -11608,6 +11780,8 @@ if {[package vcompare $git_version "1.6.6.2"] >= 0} {
     set show_notes "--show-notes"
 }
 
+set appname "gitk"
+
 set runq {}
 set history {}
 set historyindex 0
@@ -11644,35 +11818,44 @@ set stopped 0
 set stuffsaved 0
 set patchnum 0
 set lserial 0
-set isworktree [expr {[exec git rev-parse --is-inside-work-tree] == "true"}]
+set hasworktree [hasworktree]
+set cdup {}
+if {[expr {[exec git rev-parse --is-inside-work-tree] == "true"}]} {
+    set cdup [exec git rev-parse --show-cdup]
+}
+set worktree [exec git rev-parse --show-toplevel]
 setcoords
 makewindow
-catch {
-    image create photo gitlogo      -width 16 -height 16
+if {$::tcl_platform(platform) eq {windows} && [file exists $gitk_prefix/etc/git.ico]} {
+    wm iconbitmap . -default $gitk_prefix/etc/git.ico
+} else {
+    catch {
+        image create photo gitlogo      -width 16 -height 16
 
-    image create photo gitlogominus -width  4 -height  2
-    gitlogominus put #C00000 -to 0 0 4 2
-    gitlogo copy gitlogominus -to  1 5
-    gitlogo copy gitlogominus -to  6 5
-    gitlogo copy gitlogominus -to 11 5
-    image delete gitlogominus
+        image create photo gitlogominus -width  4 -height  2
+        gitlogominus put #C00000 -to 0 0 4 2
+        gitlogo copy gitlogominus -to  1 5
+        gitlogo copy gitlogominus -to  6 5
+        gitlogo copy gitlogominus -to 11 5
+        image delete gitlogominus
 
-    image create photo gitlogoplus  -width  4 -height  4
-    gitlogoplus  put #008000 -to 1 0 3 4
-    gitlogoplus  put #008000 -to 0 1 4 3
-    gitlogo copy gitlogoplus  -to  1 9
-    gitlogo copy gitlogoplus  -to  6 9
-    gitlogo copy gitlogoplus  -to 11 9
-    image delete gitlogoplus
+        image create photo gitlogoplus  -width  4 -height  4
+        gitlogoplus  put #008000 -to 1 0 3 4
+        gitlogoplus  put #008000 -to 0 1 4 3
+        gitlogo copy gitlogoplus  -to  1 9
+        gitlogo copy gitlogoplus  -to  6 9
+        gitlogo copy gitlogoplus  -to 11 9
+        image delete gitlogoplus
 
-    image create photo gitlogo32    -width 32 -height 32
-    gitlogo32 copy gitlogo -zoom 2 2
+        image create photo gitlogo32    -width 32 -height 32
+        gitlogo32 copy gitlogo -zoom 2 2
 
-    wm iconphoto . -default gitlogo gitlogo32
+        wm iconphoto . -default gitlogo gitlogo32
+    }
 }
 # wait for the window to become visible
 tkwait visibility .
-wm title . "[file tail $argv0]: [file tail [pwd]]"
+wm title . "$appname: [reponame]"
 update
 readrefs
 

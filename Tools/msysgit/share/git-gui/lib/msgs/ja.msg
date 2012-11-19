@@ -476,7 +476,7 @@ set ::msgcat::header "Project-Id-Version: git-gui\nReport-Msgid-Bugs-To: \nPOT-C
 ::msgcat::mcset ja "Generating..." "\u751f\u6210\u4e2d..."
 ::msgcat::mcset ja "Could not start ssh-keygen:\n\n%s" "ssh-keygen \u3092\u8d77\u52d5\u3067\u304d\u307e\u305b\u3093:\n\n%s"
 ::msgcat::mcset ja "Generation failed." "\u751f\u6210\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002"
-::msgcat::mcset ja "Generation succeded, but no keys found." "\u751f\u6210\u306b\u306f\u6210\u529f\u3057\u307e\u3057\u305f\u304c\u3001\u9375\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002"
+::msgcat::mcset ja "Generation succeeded, but no keys found." "\u751f\u6210\u306b\u306f\u6210\u529f\u3057\u307e\u3057\u305f\u304c\u3001\u9375\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3002"
 ::msgcat::mcset ja "Your key is in: %s" "\u3042\u306a\u305f\u306e\u9375\u306f %s \u306b\u3042\u308a\u307e\u3059"
 ::msgcat::mcset ja "%s ... %*i of %*i %s (%3i%%)" "%1\$s ... %4\$*i %6\$s \u4e2d\u306e %2\$*i (%7\$3i%%)"
 ::msgcat::mcset ja "Running %s requires a selected file." "\u30d5\u30a1\u30a4\u30eb\u3092\u9078\u629e\u3057\u3066\u304b\u3089 %s \u3092\u8d77\u52d5\u3057\u3066\u304f\u3060\u3055\u3044\u3002"

@@ -12,17 +12,18 @@ SYNOPSIS
 'git tag' [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>]
 	<tagname> [<commit> | <object>]
 'git tag' -d <tagname>...
-'git tag' [-n[<num>]] -l [--contains <commit>] [<pattern>...]
+'git tag' [-n[<num>]] -l [--contains <commit>] [--points-at <object>]
+	[--column[=<options>] | --no-column] [<pattern>...]
+	[<pattern>...]
 'git tag' -v <tagname>...
 
 DESCRIPTION
 -----------
 
-Add a tag reference in `.git/refs/tags/`, unless `-d/-l/-v` is given
+Add a tag reference in `refs/tags/`, unless `-d/-l/-v` is given
 to delete, list or verify tags.
 
-Unless `-f` is given, the tag to be created must not yet exist in the
-`.git/refs/tags/` directory.
+Unless `-f` is given, the named tag must not yet exist.
 
 If one of `-a`, `-s`, or `-u <key-id>` is passed, the command
 creates a 'tag' object, and requires a tag message.  Unless
@@ -38,7 +39,9 @@ created (i.e. a lightweight tag).
 A GnuPG signed tag object will be created when `-s` or `-u
 <key-id>` is used.  When `-u <key-id>` is not used, the
 committer identity for the current user is used to find the
-GnuPG key for signing.
+GnuPG key for signing. 	The configuration variable `gpg.program`
+is used to specify custom GnuPG binary.
+
 
 OPTIONS
 -------
@@ -48,11 +51,11 @@ OPTIONS
 
 -s::
 --sign::
-	Make a GPG-signed tag, using the default e-mail address's key
+	Make a GPG-signed tag, using the default e-mail address's key.
 
 -u <key-id>::
 --local-user=<key-id>::
-	Make a GPG-signed tag, using the given key
+	Make a GPG-signed tag, using the given key.
 
 -f::
 --force::
@@ -81,8 +84,19 @@ OPTIONS
 	using fnmatch(3)).  Multiple patterns may be given; if any of
 	them matches, the tag is shown.
 
+--column[=<options>]::
+--no-column::
+	Display tag listing in columns. See configuration variable
+	column.tag for option syntax.`--column` and `--no-column`
+	without options are equivalent to 'always' and 'never' respectively.
++
+This option is only applicable when listing tags without annotation lines.
+
 --contains <commit>::
 	Only list tags which contain the specified commit.
+
+--points-at <object>::
+	Only list tags of the given object.
 
 -m <msg>::
 --message=<msg>::
@@ -98,6 +112,13 @@ OPTIONS
 	read the message from the standard input.
 	Implies `-a` if none of `-a`, `-s`, or `-u <key-id>`
 	is given.
+
+--cleanup=<mode>::
+	This option sets how the tag message is cleaned up.
+	The  '<mode>' can be one of 'verbatim', 'whitespace' and 'strip'.  The
+	'strip' mode is default. The 'verbatim' mode does not change message at
+	all, 'whitespace' removes just leading/trailing whitespace lines and
+	'strip' removes both whitespace and commentary.
 
 <tagname>::
 	The name of the tag to create, delete, or describe.

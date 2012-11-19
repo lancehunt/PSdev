@@ -83,11 +83,10 @@ OPTIONS
 
 --prefix=<prefix>/::
 	Keep the current index contents, and read the contents
-	of the named tree-ish under the directory at `<prefix>`. The
-	original index file cannot have anything at the path
-	`<prefix>` itself, nor anything in the `<prefix>/`
-	directory.  Note that the `<prefix>/` value must end
-	with a slash.
+	of the named tree-ish under the directory at `<prefix>`.
+	The command will refuse to overwrite entries that already
+	existed in the original index file. Note that the `<prefix>/`
+	value must end with a slash.
 
 --exclude-per-directory=<gitignore>::
 	When running the command with `-u` and `-m` options, the
@@ -342,7 +341,7 @@ since you pulled from him:
 
 ----------------
 $ git fetch git://.... linus
-$ LT=`cat .git/FETCH_HEAD`
+$ LT=`git rev-parse FETCH_HEAD`
 ----------------
 
 Your work tree is still based on your HEAD ($JC), but you have
@@ -401,7 +400,7 @@ files are in, you can also specify what files are _not_ in, using
 negate patterns. For example, to remove the file `unwanted`:
 
 ----------------
-*
+/*
 !unwanted
 ----------------
 
@@ -413,7 +412,7 @@ directory with the `$GIT_DIR/info/sparse-checkout` file content as
 follows:
 
 ----------------
-*
+/*
 ----------------
 
 Then you can disable sparse checkout. Sparse checkout support in 'git

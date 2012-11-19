@@ -721,6 +721,15 @@ being displayed. Examples: "--notes=foo" will show only notes from
         options instead.
 </p>
 </dd>
+<dt class="hdlist1">
+--show-signature
+</dt>
+<dd>
+<p>
+        Check the validity of a signed commit object by passing the signature
+        to <tt>gpg --verify</tt> and show the output.
+</p>
+</dd>
 </dl></div>
 </div>
 <h2 id="_pretty_formats">PRETTY FORMATS</h2>
@@ -1025,12 +1034,47 @@ The title was &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </li>
 <li>
 <p>
+<em>%GG</em>: raw verification message from GPG for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%G?</em>: show either "G" for Good or "B" for Bad for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%GS</em>: show the name of the signer for a signed commit
+</p>
+</li>
+<li>
+<p>
 <em>%gD</em>: reflog selector, e.g., <tt>refs/stash@{1}</tt>
 </p>
 </li>
 <li>
 <p>
 <em>%gd</em>: shortened reflog selector, e.g., <tt>stash@{1}</tt>
+</p>
+</li>
+<li>
+<p>
+<em>%gn</em>: reflog identity name
+</p>
+</li>
+<li>
+<p>
+<em>%gN</em>: reflog identity name (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
+</p>
+</li>
+<li>
+<p>
+<em>%ge</em>: reflog identity email
+</p>
+</li>
+<li>
+<p>
+<em>%gE</em>: reflog identity email (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
 </p>
 </li>
 <li>
@@ -1104,7 +1148,7 @@ insert an empty string unless we are traversing reflog entries (e.g., by
 format if <tt>--decorate</tt> was not already provided on the command line.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>If you add a <tt>&#43;</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
+<div class="paragraph"><p>If you add a <tt>+</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
 is inserted immediately before the expansion if and only if the
 placeholder expands to a non-empty string.</p></div>
 <div class="paragraph"><p>If you add a <tt>-</tt> (minus sign) after <em>%</em> of a placeholder, line-feeds that
@@ -1281,7 +1325,7 @@ reversible operation.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-05-02 15:00:44 PDT
 </div>
 </div>
 </body>

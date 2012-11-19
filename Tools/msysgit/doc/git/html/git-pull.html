@@ -697,19 +697,55 @@ failed and do not autocommit, to give the user a chance to
 inspect and further tweak the merge result before committing.</p></div>
 </dd>
 <dt class="hdlist1">
+--edit
+</dt>
+<dt class="hdlist1">
+--no-edit
+</dt>
+<dd>
+<p>
+        Invoke an editor before committing successful mechanical merge to
+        further edit the auto-generated merge message, so that the user
+        can explain and justify the merge. The <tt>--no-edit</tt> option can be
+        used to accept the auto-generated message (this is generally
+        discouraged). The <tt>--edit</tt> option is still useful if you are
+        giving a draft message with the <tt>-m</tt> option from the command line
+        and want to edit it in the editor.
+</p>
+<div class="paragraph"><p>Older scripts may depend on the historical behaviour of not allowing the
+user to edit the merge log message. They will see an editor opened when
+they run <tt>git merge</tt>. To make it easier to adjust such scripts to the
+updated behaviour, the environment variable <tt>GIT_MERGE_AUTOEDIT</tt> can be
+set to <tt>no</tt> at the beginning of them.</p></div>
+</dd>
+<dt class="hdlist1">
 --ff
 </dt>
+<dd>
+<p>
+        When the merge resolves as a fast-forward, only update the branch
+        pointer, without creating a merge commit.  This is the default
+        behavior.
+</p>
+</dd>
 <dt class="hdlist1">
 --no-ff
 </dt>
 <dd>
 <p>
-        Do not generate a merge commit if the merge resolved as
-        a fast-forward, only update the branch pointer. This is
-        the default behavior of git-merge.
+        Create a merge commit even when the merge resolves as a
+        fast-forward.
 </p>
-<div class="paragraph"><p>With --no-ff Generate a merge commit even if the merge
-resolved as a fast-forward.</p></div>
+</dd>
+<dt class="hdlist1">
+--ff-only
+</dt>
+<dd>
+<p>
+        Refuse to merge and exit with a non-zero status unless the
+        current <tt>HEAD</tt> is already up-to-date or the merge can be
+        resolved as a fast-forward.
+</p>
 </dd>
 <dt class="hdlist1">
 --log[=&lt;n&gt;]
@@ -762,16 +798,6 @@ merge.</p></div>
 </p>
 <div class="paragraph"><p>With --no-squash perform the merge and commit the result. This
 option can be used to override --squash.</p></div>
-</dd>
-<dt class="hdlist1">
---ff-only
-</dt>
-<dd>
-<p>
-        Refuse to merge and exit with a non-zero status unless the
-        current <tt>HEAD</tt> is already up-to-date or the merge can be
-        resolved as a fast-forward.
-</p>
 </dd>
 <dt class="hdlist1">
 -s &lt;strategy&gt;
@@ -851,6 +877,9 @@ option can be used to override --squash.</p></div>
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+-r
+</dt>
+<dt class="hdlist1">
 --rebase
 </dt>
 <dd>
@@ -861,9 +890,9 @@ option can be used to override --squash.</p></div>
         fetched, the rebase uses that information to avoid rebasing
         non-local changes.
 </p>
-<div class="paragraph"><p>See <tt>branch.&lt;name&gt;.rebase</tt> and <tt>branch.autosetuprebase</tt> in
+<div class="paragraph"><p>See <tt>pull.rebase</tt>, <tt>branch.&lt;name&gt;.rebase</tt> and <tt>branch.autosetuprebase</tt> in
 <a href="git-config.html">git-config(1)</a> if you want to make <tt>git pull</tt> always use
-<tt>&#45;&#45;rebase</tt> instead of merging.</p></div>
+<tt>--rebase</tt> instead of merging.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -915,7 +944,8 @@ unless you have read <a href="git-rebase.html">git-rebase(1)</a> carefully.</td>
 <p>
         Deepen the history of a <em>shallow</em> repository created by
         <tt>git clone</tt> with <tt>--depth=&lt;depth&gt;</tt> option (see <a href="git-clone.html">git-clone(1)</a>)
-        by the specified number of commits.
+        to the specified number of commits from the tip of each remote
+        branch history. Tags for the deepened commits are not fetched.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1011,7 +1041,7 @@ unless you have read <a href="git-rebase.html">git-rebase(1)</a> carefully.</td>
 <dd>
 <p>
         The format of a &lt;refspec&gt; parameter is an optional plus
-        <tt>&#43;</tt>, followed by the source ref &lt;src&gt;, followed
+        <tt>+</tt>, followed by the source ref &lt;src&gt;, followed
         by a colon <tt>:</tt>, followed by the destination ref &lt;dst&gt;.
 </p>
 <div class="paragraph"><p>The remote ref that matches &lt;src&gt;
@@ -1101,8 +1131,11 @@ A parameter &lt;ref&gt; without a colon is equivalent to
 address of the remote server, and the path to the repository.
 Depending on the transport protocol, some of this information may be
 absent.</p></div>
-<div class="paragraph"><p>Git natively supports ssh, git, http, https, ftp, ftps, and rsync
-protocols. The following syntaxes may be used with them:</p></div>
+<div class="paragraph"><p>Git supports ssh, git, http, and https protocols (in addition, ftp,
+and ftps can be used for fetching and rsync can be used for fetching
+and pushing, but these are inefficient and deprecated; do not use
+them).</p></div>
+<div class="paragraph"><p>The following syntaxes may be used with them:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -1351,6 +1384,7 @@ ours
         This option forces conflicting hunks to be auto-resolved cleanly by
         favoring <em>our</em> version.  Changes from the other tree that do not
         conflict with our side are reflected to the merge result.
+        For a binary file, the entire contents are taken from our side.
 </p>
 <div class="paragraph"><p>This should not be confused with the <em>ours</em> merge strategy, which does not
 even look at what the other tree contains at all.  It discards everything
@@ -1361,7 +1395,7 @@ theirs
 </dt>
 <dd>
 <p>
-        This is opposite of <em>ours</em>.
+        This is the opposite of <em>ours</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1613,7 +1647,7 @@ version.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-08-22 12:54:47 PDT
 </div>
 </div>
 </body>

@@ -693,7 +693,7 @@ entries; instead, unmerged entries are ignored.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
--b
+-b &lt;new_branch&gt;
 </dt>
 <dd>
 <p>
@@ -702,7 +702,7 @@ entries; instead, unmerged entries are ignored.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
--B
+-B &lt;new_branch&gt;
 </dt>
 <dd>
 <p>
@@ -764,7 +764,7 @@ explicitly give a name with <em>-b</em> in such a case.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
---orphan
+--orphan &lt;new_branch&gt;
 </dt>
 <dd>
 <p>
@@ -840,8 +840,8 @@ the conflicted merge in the specified paths.</p></div>
         working tree (and if a &lt;tree-ish&gt; was specified, the index).
 </p>
 <div class="paragraph"><p>This means that you can use <tt>git checkout -p</tt> to selectively discard
-edits from your current working tree. See the &#8220;Interactive Mode&#8221;
-section of <a href="git-add.html">git-add(1)</a> to learn how to operate the <tt>--patch</tt> mode.</p></div>
+edits from your current working tree. See the <tt>`Interactive Mode''
+section of linkgit:git-add[1] to learn how to operate the `--patch</tt> mode.</p></div>
 </dd>
 <dt class="hdlist1">
 &lt;branch&gt;
@@ -1059,6 +1059,16 @@ take a file out of another commit
 <p>
 restore hello.c from the index
 </p>
+<div class="paragraph"><p>If you want to check out <em>all</em> C source files out of the index,
+you can say</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ git checkout -- '*.c'</tt></pre>
+</div></div>
+<div class="paragraph"><p>Note the quotes around <tt>*.c</tt>.  The file <tt>hello.c</tt> will also be
+checked out, even though it is no longer in the working tree,
+because the file globbing is used to match entries in the index
+(not in the working tree by the shell).</p></div>
 <div class="paragraph"><p>If you have an unfortunate branch that is named <tt>hello.c</tt>, this
 step would be confused as an instruction to switch to that branch.
 You should instead write:</p></div>
@@ -1129,7 +1139,7 @@ $ git add frotz</tt></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-09-12 15:56:23 PDT
 </div>
 </div>
 </body>

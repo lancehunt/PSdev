@@ -636,10 +636,12 @@ The names of the output files are printed to standard
 output, unless the <tt>--stdout</tt> option is specified.</p></div>
 <div class="paragraph"><p>If <tt>-o</tt> is specified, output files are created in &lt;dir&gt;.  Otherwise
 they are created in the current working directory.</p></div>
-<div class="paragraph"><p>By default, the subject of a single patch is "[PATCH] First Line" and
-the subject when multiple patches are output is "[PATCH n/m] First
-Line". To force 1/1 to be added for a single patch, use <tt>-n</tt>.  To omit
-patch numbers from the subject, use <tt>-N</tt>.</p></div>
+<div class="paragraph"><p>By default, the subject of a single patch is "[PATCH] " followed by
+the concatenation of lines from the commit message up to the first blank
+line (see the DISCUSSION section of <a href="git-commit.html">git-commit(1)</a>).</p></div>
+<div class="paragraph"><p>When multiple patches are output, the subject prefix will instead be
+"[PATCH n/m] ".  To force 1/1 to be added for a single patch, use <tt>-n</tt>.
+To omit patch numbers from the subject, use <tt>-N</tt>.</p></div>
 <div class="paragraph"><p>If given <tt>--thread</tt>, <tt>git-format-patch</tt> will generate <tt>In-Reply-To</tt> and
 <tt>References</tt> headers to make the second and subsequent patch mails appear
 as replies to the first mail; this also generates a <tt>Message-Id</tt> header to
@@ -672,6 +674,15 @@ reference.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--minimal
+</dt>
+<dd>
+<p>
+        Spend extra time to make sure the smallest possible
+        diff is produced.
+</p>
+</dd>
+<dt class="hdlist1">
 --patience
 </dt>
 <dd>
@@ -680,17 +691,31 @@ reference.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--histogram
+</dt>
+<dd>
+<p>
+        Generate a diff using the "histogram diff" algorithm.
+</p>
+</dd>
+<dt class="hdlist1">
 --stat[=&lt;width&gt;[,&lt;name-width&gt;[,&lt;count&gt;]]]
 </dt>
 <dd>
 <p>
-        Generate a diffstat.  You can override the default
-        output width for 80-column terminal by <tt>--stat=&lt;width&gt;</tt>.
-        The width of the filename part can be controlled by
-        giving another width to it separated by a comma.
+        Generate a diffstat. By default, as much space as necessary
+        will be used for the filename part, and the rest for the graph
+        part. Maximum width defaults to terminal width, or 80 columns
+        if not connected to a terminal, and can be overridden by
+        <tt>&lt;width&gt;</tt>. The width of the filename part can be limited by
+        giving another width <tt>&lt;name-width&gt;</tt> after a comma. The width
+        of the graph part can be limited by using
+        <tt>--stat-graph-width=&lt;width&gt;</tt> (affects all commands generating
+        a stat graph) or by setting <tt>diff.statGraphWidth=&lt;width&gt;</tt>
+        (does not affect <tt>git format-patch</tt>).
         By giving a third parameter <tt>&lt;count&gt;</tt>, you can limit the
-        output to the first <tt>&lt;count&gt;</tt> lines, followed by
-        <tt>&#8230;</tt> if there are more.
+        output to the first <tt>&lt;count&gt;</tt> lines, followed by <tt>...</tt> if
+        there are more.
 </p>
 <div class="paragraph"><p>These parameters can also be set individually with <tt>--stat-width=&lt;width&gt;</tt>,
 <tt>--stat-name-width=&lt;name-width&gt;</tt> and <tt>--stat-count=&lt;count&gt;</tt>.</p></div>
@@ -1006,6 +1031,17 @@ of a delete/create pair.</p></div>
 <p>
         Show the context between diff hunks, up to the specified number
         of lines, thereby fusing hunks that are close to each other.
+</p>
+</dd>
+<dt class="hdlist1">
+-W
+</dt>
+<dt class="hdlist1">
+--function-context
+</dt>
+<dd>
+<p>
+        Show whole surrounding functions of changes.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1735,7 +1771,7 @@ as e-mailable patches:
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-09-17 16:55:59 PDT
 </div>
 </div>
 </body>

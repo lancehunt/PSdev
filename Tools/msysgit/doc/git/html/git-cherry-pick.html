@@ -584,8 +584,9 @@ git-cherry-pick(1) Manual Page
 <div class="sectionbody">
 <div class="verseblock">
 <div class="verseblock-content"><em>git cherry-pick</em> [--edit] [-n] [-m parent-number] [-s] [-x] [--ff] &lt;commit&gt;&#8230;
-<em>git cherry-pick</em> --reset
-<em>git cherry-pick</em> --continue</div>
+<em>git cherry-pick</em> --continue
+<em>git cherry-pick</em> --quit
+<em>git cherry-pick</em> --abort</div>
 <div class="verseblock-attribution">
 </div></div>
 </div>
@@ -646,7 +647,9 @@ conflicts.</p></div>
         <a href="gitrevisions.html">gitrevisions(7)</a>.
         Sets of commits can be passed but no traversal is done by
         default, as if the <em>--no-walk</em> option was specified, see
-        <a href="git-rev-list.html">git-rev-list(1)</a>.
+        <a href="git-rev-list.html">git-rev-list(1)</a>. Note that specifying a range will
+        feed all &lt;commit&gt;&#8230; arguments to a single revision walk
+        (see a later example that uses <em>maint master..next</em>).
 </p>
 </dd>
 <dt class="hdlist1">
@@ -746,6 +749,45 @@ effect to your index in a row.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--allow-empty
+</dt>
+<dd>
+<p>
+        By default, cherry-picking an empty commit will fail,
+        indicating that an explicit invocation of <tt>git commit
+        --allow-empty</tt> is required. This option overrides that
+        behavior, allowing empty commits to be preserved automatically
+        in a cherry-pick. Note that when "--ff" is in effect, empty
+        commits that meet the "fast-forward" requirement will be kept
+        even without this option.  Note also, that use of this option only
+        keeps commits that were initially empty (i.e. the commit recorded the
+        same tree as its parent).  Commits which are made empty due to a
+        previous commit are dropped.  To force the inclusion of those commits
+        use <tt>--keep-redundant-commits</tt>.
+</p>
+</dd>
+<dt class="hdlist1">
+--allow-empty-message
+</dt>
+<dd>
+<p>
+        By default, cherry-picking a commit with an empty message will fail.
+        This option overrides that behaviour, allowing commits with empty
+        messages to be cherry picked.
+</p>
+</dd>
+<dt class="hdlist1">
+--keep-redundant-commits
+</dt>
+<dd>
+<p>
+        If a commit being cherry picked duplicates a commit already in the
+        current history, it will become empty.  By default these
+        redundant commits are ignored.  This option overrides that behavior and
+        creates an empty commit object.  Implies <tt>--allow-empty</tt>.
+</p>
+</dd>
+<dt class="hdlist1">
 --strategy=&lt;strategy&gt;
 </dt>
 <dd>
@@ -773,7 +815,17 @@ effect to your index in a row.</p></div>
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
---reset
+--continue
+</dt>
+<dd>
+<p>
+        Continue the operation in progress using the information in
+        <em>.git/sequencer</em>.  Can be used to continue after resolving
+        conflicts in a failed cherry-pick or revert.
+</p>
+</dd>
+<dt class="hdlist1">
+--quit
 </dt>
 <dd>
 <p>
@@ -783,13 +835,11 @@ effect to your index in a row.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
---continue
+--abort
 </dt>
 <dd>
 <p>
-        Continue the operation in progress using the information in
-        <em>.git/sequencer</em>.  Can be used to continue after resolving
-        conflicts in a failed cherry-pick or revert.
+        Cancel the operation and return to the pre-sequence state.
 </p>
 </dd>
 </dl></div>
@@ -819,7 +869,22 @@ effect to your index in a row.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<tt>git cherry-pick master&#126;4 master&#126;2</tt>
+<tt>git cherry-pick maint next ^master</tt>
+</dt>
+<dt class="hdlist1">
+<tt>git cherry-pick maint master..next</tt>
+</dt>
+<dd>
+<p>
+        Apply the changes introduced by all commits that are
+        ancestors of maint or next, but not master or any of its
+        ancestors.  Note that the latter does not mean <tt>maint</tt> and
+        everything between <tt>master</tt> and <tt>next</tt>; specifically,
+        <tt>maint</tt> will not be used if it is included in <tt>master</tt>.
+</p>
+</dd>
+<dt class="hdlist1">
+<tt>git cherry-pick master~4 master~2</tt>
 </dt>
 <dd>
 <p>
@@ -915,7 +980,7 @@ context lines.
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-10-05 13:59:16 PDT
+Last updated 2012-09-04 16:16:22 PDT
 </div>
 </div>
 </body>

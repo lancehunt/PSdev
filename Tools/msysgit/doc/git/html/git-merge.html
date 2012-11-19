@@ -583,7 +583,7 @@ git-merge(1) Manual Page
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<div class="verseblock-content"><em>git merge</em> [-n] [--stat] [--no-commit] [--squash]
+<div class="verseblock-content"><em>git merge</em> [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
         [-s &lt;strategy&gt;] [-X &lt;strategy-option&gt;]
         [--[no-]rerere-autoupdate] [-m &lt;msg&gt;] [&lt;commit&gt;&#8230;]
 <em>git merge</em> &lt;msg&gt; HEAD &lt;commit&gt;&#8230;
@@ -619,7 +619,7 @@ a log message from the user describing the changes.</p></div>
 </div></div>
 <div class="paragraph"><p>The second syntax (&lt;msg&gt; <tt>HEAD</tt> &lt;commit&gt;&#8230;) is supported for
 historical reasons.  Do not use it from the command line or in
-new scripts.  It is the same as <tt>git merge -m &lt;msg&gt; &lt;commit&gt;&#8230;</tt>.</p></div>
+new scripts.  It is the same as <tt>git merge -m &lt;msg&gt; &lt;commit&gt;...</tt>.</p></div>
 <div class="paragraph"><p>The third syntax ("<tt>git merge --abort</tt>") can only be run after the
 merge has resulted in conflicts. <em>git merge --abort</em> will abort the
 merge process and try to reconstruct the pre-merge state. However,
@@ -650,19 +650,55 @@ failed and do not autocommit, to give the user a chance to
 inspect and further tweak the merge result before committing.</p></div>
 </dd>
 <dt class="hdlist1">
+--edit
+</dt>
+<dt class="hdlist1">
+--no-edit
+</dt>
+<dd>
+<p>
+        Invoke an editor before committing successful mechanical merge to
+        further edit the auto-generated merge message, so that the user
+        can explain and justify the merge. The <tt>--no-edit</tt> option can be
+        used to accept the auto-generated message (this is generally
+        discouraged). The <tt>--edit</tt> option is still useful if you are
+        giving a draft message with the <tt>-m</tt> option from the command line
+        and want to edit it in the editor.
+</p>
+<div class="paragraph"><p>Older scripts may depend on the historical behaviour of not allowing the
+user to edit the merge log message. They will see an editor opened when
+they run <tt>git merge</tt>. To make it easier to adjust such scripts to the
+updated behaviour, the environment variable <tt>GIT_MERGE_AUTOEDIT</tt> can be
+set to <tt>no</tt> at the beginning of them.</p></div>
+</dd>
+<dt class="hdlist1">
 --ff
 </dt>
+<dd>
+<p>
+        When the merge resolves as a fast-forward, only update the branch
+        pointer, without creating a merge commit.  This is the default
+        behavior.
+</p>
+</dd>
 <dt class="hdlist1">
 --no-ff
 </dt>
 <dd>
 <p>
-        Do not generate a merge commit if the merge resolved as
-        a fast-forward, only update the branch pointer. This is
-        the default behavior of git-merge.
+        Create a merge commit even when the merge resolves as a
+        fast-forward.
 </p>
-<div class="paragraph"><p>With --no-ff Generate a merge commit even if the merge
-resolved as a fast-forward.</p></div>
+</dd>
+<dt class="hdlist1">
+--ff-only
+</dt>
+<dd>
+<p>
+        Refuse to merge and exit with a non-zero status unless the
+        current <tt>HEAD</tt> is already up-to-date or the merge can be
+        resolved as a fast-forward.
+</p>
 </dd>
 <dt class="hdlist1">
 --log[=&lt;n&gt;]
@@ -715,16 +751,6 @@ merge.</p></div>
 </p>
 <div class="paragraph"><p>With --no-squash perform the merge and commit the result. This
 option can be used to override --squash.</p></div>
-</dd>
-<dt class="hdlist1">
---ff-only
-</dt>
-<dd>
-<p>
-        Refuse to merge and exit with a non-zero status unless the
-        current <tt>HEAD</tt> is already up-to-date or the merge can be
-        resolved as a fast-forward.
-</p>
 </dd>
 <dt class="hdlist1">
 -s &lt;strategy&gt;
@@ -945,7 +971,7 @@ other side left that area intact, or vice versa) are incorporated in the
 final result verbatim.  When both sides made changes to the same area,
 however, git cannot randomly pick one side over the other, and asks you to
 resolve it by leaving what both sides did to that area.</p></div>
-<div class="paragraph"><p>By default, git uses the same style as that is used by "merge" program
+<div class="paragraph"><p>By default, git uses the same style as the one used by the "merge" program
 from the RCS suite to present such a conflicted hunk, like this:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -1129,6 +1155,7 @@ ours
         This option forces conflicting hunks to be auto-resolved cleanly by
         favoring <em>our</em> version.  Changes from the other tree that do not
         conflict with our side are reflected to the merge result.
+        For a binary file, the entire contents are taken from our side.
 </p>
 <div class="paragraph"><p>This should not be confused with the <em>ours</em> merge strategy, which does not
 even look at what the other tree contains at all.  It discards everything
@@ -1139,7 +1166,7 @@ theirs
 </dt>
 <dd>
 <p>
-        This is opposite of <em>ours</em>.
+        This is the opposite of <em>ours</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1449,7 +1476,7 @@ branch.&lt;name&gt;.mergeoptions
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-07-23 21:34:17 PDT
 </div>
 </div>
 </body>

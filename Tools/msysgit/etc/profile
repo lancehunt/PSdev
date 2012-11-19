@@ -30,15 +30,6 @@ case "$PATH" in
 	;;
 esac
 
-# check msys-1.0.dll
-if test -f /etc/msys-1.0.dll.md5
-then
-	# if check succeeds, let's avoid checking again
-	md5sum --status --check /etc/msys-1.0.dll.md5 &&
-	rm -f /etc/msys-1.0.dll.md5 ||
-	printf "\n\033[31mERROR: Your msys-1.0.dll is out-of-date!\033[m\n\n"
-fi
-
 if [ -z "$USERNAME" ]; then
   LOGNAME="`id -un`"
 else
@@ -69,7 +60,7 @@ export PATH="$HOME/bin:$PATH"
 export GNUPGHOME=~/.gnupg
 
 if [ -z "$MAGIC" ]; then
-  magicfile=$(cd / && pwd -W)'/mingw/share/misc/magic'
+  magicfile=$(cd / && pwd -W)'/mingw/share/misc/magic.mgc'
   test -f "$magicfile" && export MAGIC="$magicfile"
 fi
 
@@ -161,6 +152,7 @@ esac
 
 
 . /etc/git-completion.bash
+[ -r /etc/git-prompt.sh ] && . /etc/git-prompt.sh
 if test -z "$WINELOADERNOEXEC"
 then
 	PS1='\[\033]0;$MSYSTEM:\w\007
@@ -174,6 +166,8 @@ fi
 
 # set default options for 'less'
 export LESS=-FRSX
+export LESSCHARSET=utf-8
+
 # set default protocol for 'plink'
 export PLINK_PROTOCOL=ssh
 

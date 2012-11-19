@@ -616,9 +616,9 @@ if you choose to go that route.</p></div>
 <div class="paragraph"><p>Submodules are composed from a so-called <tt>gitlink</tt> tree entry
 in the main repository that refers to a particular commit object
 within the inner repository that is completely separate.
-A record in the <tt>.gitmodules</tt> file at the root of the source
-tree assigns a logical name to the submodule and describes
-the default URL the submodule shall be cloned from.
+A record in the <tt>.gitmodules</tt> (see <a href="gitmodules.html">gitmodules(5)</a>) file at the
+root of the source tree assigns a logical name to the submodule and
+describes the default URL the submodule shall be cloned from.
 The logical name can be used for overriding this URL within your
 local repository configuration (see <em>submodule init</em>).</p></div>
 <div class="paragraph"><p>This command will manage the tree entries and contents of the
@@ -654,7 +654,12 @@ to exist in the superproject. If &lt;path&gt; is not given, the
 <div class="paragraph"><p>&lt;repository&gt; is the URL of the new submodule&#8217;s origin repository.
 This may be either an absolute URL, or (if it begins with ./
 or ../), the location relative to the superproject&#8217;s origin
-repository. If the superproject doesn&#8217;t have an origin configured
+repository (Please note that to specify a repository <em>foo.git</em>
+which is located right next to a superproject <em>bar.git</em>, you&#8217;ll
+have to use <em>../foo.git</em> instead of <em>./foo.git</em> - as one might expect
+when following the rules for relative URLs - because the evaluation
+of relative URLs in Git is identical to that of relative directories).
+If the superproject doesn&#8217;t have an origin configured
 the superproject is its own authoritative upstream and the current
 working directory is used instead.</p></div>
 <div class="paragraph"><p>&lt;path&gt; is the relative location for the cloned submodule to
@@ -684,7 +689,6 @@ status
         initialized, <tt>+</tt> if the currently checked out submodule commit
         does not match the SHA-1 found in the index of the containing
         repository and <tt>U</tt> if the submodule has merge conflicts.
-        This command is the default command for <em>git submodule</em>.
 </p>
 <div class="paragraph"><p>If <tt>--recursive</tt> is specified, this command will recurse into nested
 submodules, and show their status as well.</p></div>
@@ -700,6 +704,8 @@ init
 <p>
         Initialize the submodules, i.e. register each submodule name
         and url found in .gitmodules into .git/config.
+        It will also copy the value of <tt>submodule.$name.update</tt> into
+        .git/config.
         The key used in .git/config is <tt>submodule.$name.url</tt>.
         This command does not alter existing information in .git/config.
         You can then customize the submodule clone URLs in .git/config
@@ -718,13 +724,18 @@ update
         checkout the commit specified in the index of the containing repository.
         This will make the submodules HEAD be detached unless <tt>--rebase</tt> or
         <tt>--merge</tt> is specified or the key <tt>submodule.$name.update</tt> is set to
-        <tt>rebase</tt> or <tt>merge</tt>.
+        <tt>rebase</tt>, <tt>merge</tt> or <tt>none</tt>. <tt>none</tt> can be overridden by specifying
+        <tt>--checkout</tt>.
 </p>
 <div class="paragraph"><p>If the submodule is not yet initialized, and you just want to use the
 setting as stored in .gitmodules, you can automatically initialize the
 submodule with the <tt>--init</tt> option.</p></div>
 <div class="paragraph"><p>If <tt>--recursive</tt> is specified, this command will recurse into the
 registered submodules, and update any nested submodules within.</p></div>
+<div class="paragraph"><p>If <tt>--force</tt> is specified, the submodule will be checked out (using
+<tt>git checkout --force</tt> if appropriate), even if the commit specified in the
+index of the containing repository already matches the commit checked out in
+the submodule.</p></div>
 </dd>
 <dt class="hdlist1">
 summary
@@ -775,7 +786,7 @@ sync
 <p>
         Synchronizes submodules' remote URL configuration setting
         to the value specified in .gitmodules. It will only affect those
-        submodules which already have an url entry in .git/config (that is the
+        submodules which already have a URL entry in .git/config (that is the
         case when they are initialized or freshly added). This is useful when
         submodule URLs change upstream and you need to update your local
         repositories accordingly.
@@ -821,7 +832,9 @@ sync
         This option is only valid for add and update commands.
         When running add, allow adding an otherwise ignored submodule path.
         When running update, throw away local changes in submodules when
-        switching to a different commit.
+        switching to a different commit; and always run a checkout operation
+        in the submodule, even if the commit listed in the index of the
+        containing repository matches the commit checked out in the submodule.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -961,7 +974,7 @@ for details.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-09-30 00:37:08 PDT
 </div>
 </div>
 </body>

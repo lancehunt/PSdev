@@ -643,6 +643,15 @@ same as for <em>git diff-index</em> and <em>git diff-tree</em>.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--minimal
+</dt>
+<dd>
+<p>
+        Spend extra time to make sure the smallest possible
+        diff is produced.
+</p>
+</dd>
+<dt class="hdlist1">
 --patience
 </dt>
 <dd>
@@ -651,17 +660,31 @@ same as for <em>git diff-index</em> and <em>git diff-tree</em>.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--histogram
+</dt>
+<dd>
+<p>
+        Generate a diff using the "histogram diff" algorithm.
+</p>
+</dd>
+<dt class="hdlist1">
 --stat[=&lt;width&gt;[,&lt;name-width&gt;[,&lt;count&gt;]]]
 </dt>
 <dd>
 <p>
-        Generate a diffstat.  You can override the default
-        output width for 80-column terminal by <tt>--stat=&lt;width&gt;</tt>.
-        The width of the filename part can be controlled by
-        giving another width to it separated by a comma.
+        Generate a diffstat. By default, as much space as necessary
+        will be used for the filename part, and the rest for the graph
+        part. Maximum width defaults to terminal width, or 80 columns
+        if not connected to a terminal, and can be overridden by
+        <tt>&lt;width&gt;</tt>. The width of the filename part can be limited by
+        giving another width <tt>&lt;name-width&gt;</tt> after a comma. The width
+        of the graph part can be limited by using
+        <tt>--stat-graph-width=&lt;width&gt;</tt> (affects all commands generating
+        a stat graph) or by setting <tt>diff.statGraphWidth=&lt;width&gt;</tt>
+        (does not affect <tt>git format-patch</tt>).
         By giving a third parameter <tt>&lt;count&gt;</tt>, you can limit the
-        output to the first <tt>&lt;count&gt;</tt> lines, followed by
-        <tt>&#8230;</tt> if there are more.
+        output to the first <tt>&lt;count&gt;</tt> lines, followed by <tt>...</tt> if
+        there are more.
 </p>
 <div class="paragraph"><p>These parameters can also be set individually with <tt>--stat-width=&lt;width&gt;</tt>,
 <tt>--stat-name-width=&lt;name-width&gt;</tt> and <tt>--stat-count=&lt;count&gt;</tt>.</p></div>
@@ -817,11 +840,12 @@ any of those replacements occurred.</p></div>
 </dt>
 <dd>
 <p>
-        Chose the output format for submodule differences. &lt;format&gt; can be one of
-        <em>short</em> and <em>log</em>. <em>short</em> just shows pairs of commit names, this format
-        is used when this option is not given. <em>log</em> is the default value for this
-        option and lists the commits in that commit range like the <em>summary</em>
-        option of <a href="git-submodule.html">git-submodule(1)</a> does.
+        Specify how differences in submodules are shown.  When <tt>--submodule</tt>
+        or <tt>--submodule=log</tt> is given, the <em>log</em> format is used.  This format lists
+        the commits in the range like <a href="git-submodule.html">git-submodule(1)</a> <tt>summary</tt> does.
+        Omitting the <tt>--submodule</tt> option or specifying <tt>--submodule=short</tt>,
+        uses the <em>short</em> format. This format just shows the names of the commits
+        at the beginning and end of the range.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -867,7 +891,7 @@ plain
 </dt>
 <dd>
 <p>
-        Show words as <tt>[-removed-]</tt> and <tt>{<tt>added</tt>}</tt>.  Makes no
+        Show words as <tt>[-removed-]</tt> and <tt>{+added+}</tt>.  Makes no
         attempts to escape the delimiters if they appear in the input,
         so the output may be ambiguous.
 </p>
@@ -1223,6 +1247,17 @@ of a delete/create pair.</p></div>
 <p>
         Show the context between diff hunks, up to the specified number
         of lines, thereby fusing hunks that are close to each other.
+</p>
+</dd>
+<dt class="hdlist1">
+-W
+</dt>
+<dt class="hdlist1">
+--function-context
+</dt>
+<dd>
+<p>
+        Show whole surrounding functions of changes.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1803,7 +1838,7 @@ added, from the point of view of that parent).</p></div>
 from both files (hence two <tt>-</tt> removals from both file1 and
 file2, plus <tt>++</tt> to mean one line that was added does not appear
 in either file1 nor file2).  Also eight other lines are the same
-from file1 but do not appear in file2 (hence prefixed with <tt>&#43;</tt>).</p></div>
+from file1 but do not appear in file2 (hence prefixed with <tt>+</tt>).</p></div>
 <div class="paragraph"><p>When shown by <tt>git diff-tree -c</tt>, it compares the parents of a
 merge commit with the merge result (i.e. file1..fileN are the
 parents).  When shown by <tt>git diff-files -c</tt>, it compares the
@@ -1934,7 +1969,7 @@ the pathname, but if that is <tt>NUL</tt>, the record will show two paths.</p></
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2011-11-15 13:45:02 PDT
 </div>
 </div>
 </body>

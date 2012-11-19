@@ -679,11 +679,19 @@ used by commands as different as <em>git bisect</em> and
 <h3 id="_commit_limiting">Commit Limiting</h3><div style="clear:left"></div>
 <div class="paragraph"><p>Besides specifying a range of commits that should be listed using the
 special notations explained in the description, additional commit
-limiting may be applied. Note that they are applied before commit
-ordering and formatting options, such as <em>--reverse</em>.</p></div>
+limiting may be applied.</p></div>
+<div class="paragraph"><p>Using more options generally further limits the output (e.g.
+<tt>--since=&lt;date1&gt;</tt> limits to commits newer than <tt>&lt;date1&gt;</tt>, and using it
+with <tt>--grep=&lt;pattern&gt;</tt> further limits to commits whose log message
+has a line that matches <tt>&lt;pattern&gt;</tt>), unless otherwise noted.</p></div>
+<div class="paragraph"><p>Note that these are applied before commit
+ordering and formatting options, such as <tt>--reverse</tt>.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
--n <em>number</em>
+-&lt;number&gt;
+</dt>
+<dt class="hdlist1">
+-n &lt;number&gt;
 </dt>
 <dt class="hdlist1">
 --max-count=&lt;number&gt;
@@ -743,7 +751,22 @@ ordering and formatting options, such as <em>--reverse</em>.</p></div>
 <dd>
 <p>
         Limit the commits output to ones with author/committer
-        header lines that match the specified pattern (regular expression).
+        header lines that match the specified pattern (regular
+        expression).  With more than one <tt>--author=&lt;pattern&gt;</tt>,
+        commits whose author matches any of the given patterns are
+        chosen (similarly for multiple <tt>--committer=&lt;pattern&gt;</tt>).
+</p>
+</dd>
+<dt class="hdlist1">
+--grep-reflog=&lt;pattern&gt;
+</dt>
+<dd>
+<p>
+        Limit the commits output to ones with reflog entries that
+        match the specified pattern (regular expression). With
+        more than one <tt>--grep-reflog</tt>, commits whose reflog message
+        matches any of the given patterns are chosen.  It is an
+        error to use this option unless <tt>--walk-reflogs</tt> is in use.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -752,8 +775,13 @@ ordering and formatting options, such as <em>--reverse</em>.</p></div>
 <dd>
 <p>
         Limit the commits output to ones with log message that
-        matches the specified pattern (regular expression).
+        matches the specified pattern (regular expression).  With
+        more than one <tt>--grep=&lt;pattern&gt;</tt>, commits whose message
+        matches any of the given patterns are chosen (but see
+        <tt>--all-match</tt>).
 </p>
+<div class="paragraph"><p>When <tt>--show-notes</tt> is in effect, the message from the notes as
+if it is part of the log message.</p></div>
 </dd>
 <dt class="hdlist1">
 --all-match
@@ -761,7 +789,7 @@ ordering and formatting options, such as <em>--reverse</em>.</p></div>
 <dd>
 <p>
         Limit the commits output to ones that match all given --grep,
-        --author and --committer instead of ones that match at least one.
+        instead of ones that match at least one.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -887,7 +915,7 @@ parents) and <tt>--max-parents=-1</tt> (negative numbers denote no upper limit).
         Pretend as if all the refs in <tt>refs/heads</tt> are listed
         on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit
         branches to ones matching given shell glob. If pattern lacks <em>?</em>,
-        <em><strong></em>, or <em>[</em>, <em>/</strong></em> at the end is implied.
+        <em>&#42;</em>, or <em>[</em>, <em>/&#42;</em> at the end is implied.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -897,8 +925,8 @@ parents) and <tt>--max-parents=-1</tt> (negative numbers denote no upper limit).
 <p>
         Pretend as if all the refs in <tt>refs/tags</tt> are listed
         on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit
-        tags to ones matching given shell glob. If pattern lacks <em>?</em>, <em><strong></em>,
-        or <em>[</em>, <em>/</strong></em> at the end is implied.
+        tags to ones matching given shell glob. If pattern lacks <em>?</em>, <em>&#42;</em>,
+        or <em>[</em>, <em>/&#42;</em> at the end is implied.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -909,7 +937,7 @@ parents) and <tt>--max-parents=-1</tt> (negative numbers denote no upper limit).
         Pretend as if all the refs in <tt>refs/remotes</tt> are listed
         on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit
         remote-tracking branches to ones matching given shell glob.
-        If pattern lacks <em>?</em>, <em><strong></em>, or <em>[</em>, <em>/</strong></em> at the end is implied.
+        If pattern lacks <em>?</em>, <em>&#42;</em>, or <em>[</em>, <em>/&#42;</em> at the end is implied.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -919,8 +947,8 @@ parents) and <tt>--max-parents=-1</tt> (negative numbers denote no upper limit).
 <p>
         Pretend as if all the refs matching shell glob <em>&lt;glob-pattern&gt;</em>
         are listed on the command line as <em>&lt;commit&gt;</em>. Leading <em>refs/</em>,
-        is automatically prepended if missing. If pattern lacks <em>?</em>, <em><strong></em>,
-        or <em>[</em>, <em>/</strong></em> at the end is implied.
+        is automatically prepended if missing. If pattern lacks <em>?</em>, <em>&#42;</em>,
+        or <em>[</em>, <em>/&#42;</em> at the end is implied.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -993,9 +1021,9 @@ excluded from the output.</p></div>
         i.e. only those which would be marked <tt>&lt;</tt> resp. <tt>&gt;</tt> by
         <tt>--left-right</tt>.
 </p>
-<div class="paragraph"><p>For example, <tt>--cherry-pick --right-only A&#8230;B</tt> omits those
+<div class="paragraph"><p>For example, <tt>--cherry-pick --right-only A...B</tt> omits those
 commits from <tt>B</tt> which are in <tt>A</tt> or are patch-equivalent to a commit in
-<tt>A</tt>. In other words, this lists the <tt>&#43;</tt> commits from <tt>git cherry A B</tt>.
+<tt>A</tt>. In other words, this lists the <tt>+</tt> commits from <tt>git cherry A B</tt>.
 More precisely, <tt>--cherry-pick --right-only --no-merges</tt> gives the exact
 list.</p></div>
 </dd>
@@ -1007,7 +1035,7 @@ list.</p></div>
         A synonym for <tt>--right-only --cherry-mark --no-merges</tt>; useful to
         limit the output to the commits on our side and mark those that
         have been applied to the other side of a forked history with
-        <tt>git log --cherry upstream&#8230;mybranch</tt>, similar to
+        <tt>git log --cherry upstream...mybranch</tt>, similar to
         <tt>git cherry upstream mybranch</tt>.
 </p>
 </dd>
@@ -1306,24 +1334,24 @@ sides of the merge are never walked.</p></div>
         First, build a history graph in the same way that
         <em>--full-history</em> with parent rewriting does (see above).
 </p>
-<div class="paragraph"><p>Then simplify each commit &#8216;C` to its replacement <tt>C&#8217;</tt> in the final
+<div class="paragraph"><p>Then simplify each commit <tt>C</tt> to its replacement <tt>C'</tt> in the final
 history according to the following rules:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Set &#8216;C&#8217;` to <tt>C</tt>.
+Set <tt>C'</tt> to <tt>C</tt>.
 </p>
 </li>
 <li>
 <p>
-Replace each parent &#8216;P` of <tt>C&#8217;</tt> with its simplification &#8216;P&#8217;`.  In
+Replace each parent <tt>P</tt> of <tt>C'</tt> with its simplification <tt>P'</tt>.  In
   the process, drop parents that are ancestors of other parents, and
   remove duplicates.
 </p>
 </li>
 <li>
 <p>
-If after this parent rewriting, &#8216;C&#8217;` is a root or merge commit (has
+If after this parent rewriting, <tt>C'</tt> is a root or merge commit (has
   zero or &gt;1 parents), a boundary commit, or !TREESAME, it remains.
   Otherwise, it is replaced with its only parent.
 </p>
@@ -1476,23 +1504,37 @@ after all the sorted commit objects, there will be the same text as if
 <div class="paragraph"><p>By default, the commits are shown in reverse chronological order.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
---topo-order
-</dt>
-<dd>
-<p>
-        This option makes them appear in topological order (i.e.
-        descendant commits are shown before their parents).
-</p>
-</dd>
-<dt class="hdlist1">
 --date-order
 </dt>
 <dd>
 <p>
-        This option is similar to <em>--topo-order</em> in the sense that no
-        parent comes before all of its children, but otherwise things
-        are still ordered in the commit timestamp order.
+        Show no parents before all of its children are shown, but
+        otherwise show commits in the commit timestamp order.
 </p>
+</dd>
+<dt class="hdlist1">
+--topo-order
+</dt>
+<dd>
+<p>
+        Show no parents before all of its children are shown, and
+        avoid showing commits on multiple lines of history
+        intermixed.
+</p>
+<div class="paragraph"><p>For example, in a commit history like this:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>    ---1----2----4----7
+        \              \
+         3----5----6----8---</tt></pre>
+</div></div>
+<div class="paragraph"><p>where the numbers denote the order of commit timestamps, <tt>git
+rev-list</tt> and friends with <tt>--date-order</tt> show the commits in the
+timestamp order: 8 7 6 5 4 3 2 1.</p></div>
+<div class="paragraph"><p>With <tt>--topo-order</tt>, they would show 8 6 5 3 7 4 2 1 (or 8 7 4 2 6 5
+3 1); some older commits are shown before newer ones in order to
+avoid showing the commits from two parallel development track mixed
+together.</p></div>
 </dd>
 <dt class="hdlist1">
 --reverse
@@ -1540,11 +1582,16 @@ after all the sorted commit objects, there will be the same text as if
 </p>
 </dd>
 <dt class="hdlist1">
---no-walk
+--no-walk[=(sorted|unsorted)]
 </dt>
 <dd>
 <p>
-        Only show the given revs, but do not traverse their ancestors.
+        Only show the given commits, but do not traverse their ancestors.
+        This has no effect if a range is specified. If the argument
+        "unsorted" is given, the commits are show in the order they were
+        given on the command line. Otherwise (if "sorted" or no argument
+        was given), the commits are show in reverse chronological order
+        by commit time.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1666,6 +1713,15 @@ being displayed. Examples: "--notes=foo" will show only notes from
 <p>
         These options are deprecated. Use the above --notes/--no-notes
         options instead.
+</p>
+</dd>
+<dt class="hdlist1">
+--show-signature
+</dt>
+<dd>
+<p>
+        Check the validity of a signed commit object by passing the signature
+        to <tt>gpg --verify</tt> and show the output.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2095,12 +2151,47 @@ The title was &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </li>
 <li>
 <p>
+<em>%GG</em>: raw verification message from GPG for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%G?</em>: show either "G" for Good or "B" for Bad for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%GS</em>: show the name of the signer for a signed commit
+</p>
+</li>
+<li>
+<p>
 <em>%gD</em>: reflog selector, e.g., <tt>refs/stash@{1}</tt>
 </p>
 </li>
 <li>
 <p>
 <em>%gd</em>: shortened reflog selector, e.g., <tt>stash@{1}</tt>
+</p>
+</li>
+<li>
+<p>
+<em>%gn</em>: reflog identity name
+</p>
+</li>
+<li>
+<p>
+<em>%gN</em>: reflog identity name (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
+</p>
+</li>
+<li>
+<p>
+<em>%ge</em>: reflog identity email
+</p>
+</li>
+<li>
+<p>
+<em>%gE</em>: reflog identity email (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
 </p>
 </li>
 <li>
@@ -2174,7 +2265,7 @@ insert an empty string unless we are traversing reflog entries (e.g., by
 format if <tt>--decorate</tt> was not already provided on the command line.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>If you add a <tt>&#43;</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
+<div class="paragraph"><p>If you add a <tt>+</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
 is inserted immediately before the expansion if and only if the
 placeholder expands to a non-empty string.</p></div>
 <div class="paragraph"><p>If you add a <tt>-</tt> (minus sign) after <em>%</em> of a placeholder, line-feeds that
@@ -2226,7 +2317,7 @@ $ git log -2 --pretty=%h 4da45bef</tt></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2011-11-15 13:45:02 PDT
 </div>
 </div>
 </body>

@@ -3,13 +3,13 @@
  if test "z$*" = zversion \
  || test "z$*" = z--version; \
  then \
-	echo 'git-gui version 0.13.GITGUI'; \
+	echo 'git-gui version 0.17.GITGUI'; \
 	exit; \
  fi; \
  argv0=$0; \
  exec 'wish' "$argv0" -- "$@"
 
-set appvers {0.13.GITGUI}
+set appvers {0.17.GITGUI}
 set copyright [string map [list (c) \u00a9] {
 Copyright (c) 2006-2010 Shawn Pearce, et. al.
 
@@ -154,6 +154,7 @@ set _trace [lsearch -exact $argv --trace]
 if {$_trace >= 0} {
 	set argv [lreplace $argv $_trace $_trace]
 	set _trace 1
+	if {[tk windowingsystem] eq "win32"} { console show }
 } else {
 	set _trace 0
 }
@@ -299,7 +300,9 @@ proc is_config_true {name} {
 	global repo_config
 	if {[catch {set v $repo_config($name)}]} {
 		return 0
-	} elseif {$v eq {true} || $v eq {1} || $v eq {yes}} {
+	}
+	set v [string tolower $v]
+	if {$v eq {} || $v eq {true} || $v eq {1} || $v eq {yes} || $v eq {on}} {
 		return 1
 	} else {
 		return 0
@@ -310,7 +313,9 @@ proc is_config_false {name} {
 	global repo_config
 	if {[catch {set v $repo_config($name)}]} {
 		return 0
-	} elseif {$v eq {false} || $v eq {0} || $v eq {no}} {
+	}
+	set v [string tolower $v]
+	if {$v eq {false} || $v eq {0} || $v eq {no} || $v eq {off}} {
 		return 1
 	} else {
 		return 0
@@ -460,6 +465,35 @@ proc _which {what args} {
 	return {}
 }
 
+# Test a file for a hashbang to identify executable scripts on Windows.
+proc is_shellscript {filename} {
+	if {![file exists $filename]} {return 0}
+	set f [open $filename r]
+	fconfigure $f -encoding binary
+	set magic [read $f 2]
+	close $f
+	return [expr {$magic eq "#!"}]
+}
+
+# Run a command connected via pipes on stdout.
+# This is for use with textconv filters and uses sh -c "..." to allow it to
+# contain a command with arguments. On windows we must check for shell
+# scripts specifically otherwise just call the filter command.
+proc open_cmd_pipe {cmd path} {
+	global env
+	if {![file executable [shellpath]]} {
+		set exe [auto_execok [lindex $cmd 0]]
+		if {[is_shellscript [lindex $exe 0]]} {
+			set run [linsert [auto_execok sh] end -c "$cmd \"\$0\"" $path]
+		} else {
+			set run [concat $exe [lrange $cmd 1 end] $path]
+		}
+	} else {
+		set run [list [shellpath] -c "$cmd \"\$0\"" $path]
+	}
+	return [open |$run r]
+}
+
 proc _lappend_nice {cmd_var} {
 	global _nice
 	upvar $cmd_var cmd
@@ -500,6 +534,9 @@ proc git {args} {
 
 	_trace_exec [concat $opt $cmdp $args]
 	set result [eval exec $opt $cmdp $args]
+	if {[encoding system] != "utf-8"} {
+		set result [encoding convertfrom utf-8 [encoding convertto $result]]
+	}
 	if {$::_trace} {
 		puts stderr "< $result"
 	}
@@ -725,7 +762,10 @@ if {[is_Windows]} {
 		gitlogo put gray26  -to  5 15 11 16
 		gitlogo redither
 
-		wm iconphoto . -default gitlogo
+		image create photo gitlogo32 -width 32 -height 32
+		gitlogo32 copy gitlogo -zoom 2 2
+
+		wm iconphoto . -default gitlogo gitlogo32
 	}
 }
 
@@ -846,6 +886,7 @@ set default_config(gui.fastcopyblame) false
 set default_config(gui.copyblamethreshold) 40
 set default_config(gui.blamehistoryctx) 7
 set default_config(gui.diffcontext) 5
+set default_config(gui.diffopts) {}
 set default_config(gui.commitmsgwidth) 75
 set default_config(gui.newbranchtemplate) {}
 set default_config(gui.spellingdictionary) {}
@@ -854,10 +895,12 @@ set default_config(gui.fontdiff) [font configure font_diff]
 # TODO: this option should be added to the git-config documentation
 set default_config(gui.maxfilesdisplayed) 5000
 set default_config(gui.usettk) 1
+set default_config(gui.warndetachedcommit) 1
 set font_descs {
 	{fontui   font_ui   {mc "Main Font"}}
 	{fontdiff font_diff {mc "Diff/Console Font"}}
 }
+set default_config(gui.stageuntracked) ask
 
 ######################################################################
 ##
@@ -1048,7 +1091,7 @@ git-version proc _parse_config {arr_name args} {
 				[list git_read config] \
 				$args \
 				[list --null --list]]
-			fconfigure $fd_rc -translation binary
+			fconfigure $fd_rc -translation binary -encoding utf-8
 			set buf [read $fd_rc]
 			close $fd_rc
 		}
@@ -1059,6 +1102,10 @@ git-version proc _parse_config {arr_name args} {
 				} else {
 					set arr($name) $value
 				}
+			} elseif {[regexp {^([^\n]+)$} $line line name]} {
+				# no value given, but interpreting them as
+				# boolean will be handled as true
+				set arr($name) {}
 			}
 		}
 	}
@@ -1074,6 +1121,10 @@ git-version proc _parse_config {arr_name args} {
 					} else {
 						set arr($name) $value
 					}
+				} elseif {[regexp {^([^=]+)$} $line line name]} {
+					# no value given, but interpreting them as
+					# boolean will be handled as true
+					set arr($name) {}
 				}
 			}
 			close $fd_rc
@@ -1419,7 +1470,7 @@ proc rescan {after {honor_trustmtime 1}} {
 		(![$ui_comm edit modified]
 		|| [string trim [$ui_comm get 0.0 end]] eq {})} {
 		if {[string match amend* $commit_type]} {
-		} elseif {[load_message GITGUI_MSG]} {
+		} elseif {[load_message GITGUI_MSG utf-8]} {
 		} elseif {[run_prepare_commit_msg_hook]} {
 		} elseif {[load_message MERGE_MSG]} {
 		} elseif {[load_message SQUASH_MSG]} {
@@ -1505,7 +1556,7 @@ proc rescan_stage2 {fd after} {
 	fileevent $fd_lo readable [list read_ls_others $fd_lo $after]
 }
 
-proc load_message {file} {
+proc load_message {file {encoding {}}} {
 	global ui_comm
 
 	set f [gitdir $file]
@@ -1514,6 +1565,9 @@ proc load_message {file} {
 			return 0
 		}
 		fconfigure $fd -eofchar {}
+		if {$encoding ne {}} {
+			fconfigure $fd -encoding $encoding
+		}
 		set content [string trim [read $fd]]
 		close $fd
 		regsub -all -line {[ \r\t]+$} $content {} content
@@ -1529,7 +1583,7 @@ proc run_prepare_commit_msg_hook {} {
 
 	# prepare-commit-msg requires PREPARE_COMMIT_MSG exist.  From git-gui
 	# it will be .git/MERGE_MSG (merge), .git/SQUASH_MSG (squash), or an
-	# empty file but existant file.
+	# empty file but existent file.
 
 	set fd_pcm [open [gitdir PREPARE_COMMIT_MSG] a]
 
@@ -1605,7 +1659,7 @@ proc read_diff_index {fd after} {
 		set i [split [string range $buf_rdi $c [expr {$z1 - 2}]] { }]
 		set p [string range $buf_rdi $z1 [expr {$z2 - 1}]]
 		merge_state \
-			[encoding convertfrom $p] \
+			[encoding convertfrom utf-8 $p] \
 			[lindex $i 4]? \
 			[list [lindex $i 0] [lindex $i 2]] \
 			[list]
@@ -1638,7 +1692,7 @@ proc read_diff_files {fd after} {
 		set i [split [string range $buf_rdf $c [expr {$z1 - 2}]] { }]
 		set p [string range $buf_rdf $z1 [expr {$z2 - 1}]]
 		merge_state \
-			[encoding convertfrom $p] \
+			[encoding convertfrom utf-8 $p] \
 			?[lindex $i 4] \
 			[list] \
 			[list [lindex $i 0] [lindex $i 2]]
@@ -1661,7 +1715,7 @@ proc read_ls_others {fd after} {
 	set pck [split $buf_rlo "\0"]
 	set buf_rlo [lindex $pck end]
 	foreach p [lrange $pck 0 end-1] {
-		set p [encoding convertfrom $p]
+		set p [encoding convertfrom utf-8 $p]
 		if {[string index $p end] eq {/}} {
 			set p [string range $p 0 end-1]
 		}
@@ -2228,6 +2282,7 @@ proc do_quit {{rc {1}}} {
 				&& $msg ne {}} {
 				catch {
 					set fd [open $save w]
+					fconfigure $fd -encoding utf-8
 					puts -nonewline $fd $msg
 					close $fd
 				}
@@ -2482,6 +2537,7 @@ proc toggle_or_diff {w x y} {
 				[concat $after [list ui_ready]]
 		}
 	} else {
+		set selected_paths($path) 1
 		show_diff $path $w $lno
 	}
 }
@@ -2959,9 +3015,18 @@ blame {
 	set jump_spec {}
 	set is_path 0
 	foreach a $argv {
-		if {$is_path || [file exists $_prefix$a]} {
+		if {[file exists $a]} {
+			if {$path ne {}} usage
+			set path [normalize_relpath $a]
+			break
+		} elseif {[file exists $_prefix$a]} {
 			if {$path ne {}} usage
 			set path [normalize_relpath $_prefix$a]
+			break
+		}
+
+		if {$is_path} {
+			if {$path ne {}} usage
 			break
 		} elseif {$a eq {--}} {
 			if {$path ne {}} {
@@ -2984,8 +3049,13 @@ blame {
 	unset is_path
 
 	if {$head ne {} && $path eq {}} {
-		set path [normalize_relpath $_prefix$head]
-		set head {}
+		if {[string index $head 0] eq {/}} {
+			set path [normalize_relpath $head]
+			set head {}
+		} else {
+			set path [normalize_relpath $_prefix$head]
+			set head {}
+		}
 	}
 
 	if {$head eq {}} {
@@ -3370,6 +3440,7 @@ foreach {n c} {0 black 1 red4 2 green4 3 yellow4 4 blue4 5 magenta4 6 cyan4 7 gr
 	$ui_diff tag configure clri3$n -background $c
 }
 $ui_diff tag configure clr1 -font font_diffbold
+$ui_diff tag configure clr4 -underline 1
 
 $ui_diff tag conf d_info -foreground blue -font font_diffbold
 
@@ -3670,6 +3741,8 @@ bind $ui_diff <$M1B-Key-v> {break}
 bind $ui_diff <$M1B-Key-V> {break}
 bind $ui_diff <$M1B-Key-a> {%W tag add sel 0.0 end;break}
 bind $ui_diff <$M1B-Key-A> {%W tag add sel 0.0 end;break}
+bind $ui_diff <$M1B-Key-j> {do_revert_selection;break}
+bind $ui_diff <$M1B-Key-J> {do_revert_selection;break}
 bind $ui_diff <Key-Up>     {catch {%W yview scroll -1 units};break}
 bind $ui_diff <Key-Down>   {catch {%W yview scroll  1 units};break}
 bind $ui_diff <Key-Left>   {catch {%W xview scroll -1 units};break}
@@ -3702,6 +3775,8 @@ bind .   <$M1B-Key-s> do_signoff
 bind .   <$M1B-Key-S> do_signoff
 bind .   <$M1B-Key-t> do_add_selection
 bind .   <$M1B-Key-T> do_add_selection
+bind .   <$M1B-Key-u> do_unstage_selection
+bind .   <$M1B-Key-U> do_unstage_selection
 bind .   <$M1B-Key-j> do_revert_selection
 bind .   <$M1B-Key-J> do_revert_selection
 bind .   <$M1B-Key-i> do_add_all
@@ -3795,7 +3870,7 @@ if {[is_enabled transport]} {
 }
 
 if {[winfo exists $ui_comm]} {
-	set GITGUI_BCK_exists [load_message GITGUI_BCK]
+	set GITGUI_BCK_exists [load_message GITGUI_BCK utf-8]
 
 	# -- If both our backup and message files exist use the
 	#    newer of the two files to initialize the buffer.
@@ -3832,6 +3907,7 @@ if {[winfo exists $ui_comm]} {
 			} elseif {$m} {
 				catch {
 					set fd [open [gitdir GITGUI_BCK] w]
+					fconfigure $fd -encoding utf-8
 					puts -nonewline $fd $msg
 					close $fd
 					set GITGUI_BCK_exists 1
@@ -3886,7 +3962,7 @@ after 1 {
 		$ui_comm configure -state disabled -background gray
 	}
 }
-if {[is_enabled multicommit]} {
+if {[is_enabled multicommit] && ![is_config_false gui.gcwarning]} {
 	after 1000 hint_gc
 }
 if {[is_enabled retcode]} {

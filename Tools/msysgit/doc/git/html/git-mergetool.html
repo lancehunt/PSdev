@@ -592,9 +592,10 @@ git-mergetool(1) Manual Page
 <div class="paragraph"><p>Use <tt>git mergetool</tt> to run one of several merge utilities to resolve
 merge conflicts.  It is typically run after <em>git merge</em>.</p></div>
 <div class="paragraph"><p>If one or more &lt;file&gt; parameters are given, the merge tool program will
-be run to resolve differences on each file.  If no &lt;file&gt; names are
-specified, <em>git mergetool</em> will run the merge tool program on every file
-with merge conflicts.</p></div>
+be run to resolve differences on each file (skipping those without
+conflicts).  Specifying a directory will include all unresolved files in
+that path.  If no &lt;file&gt; names are specified, <em>git mergetool</em> will run
+the merge tool program on every file with merge conflicts.</p></div>
 </div>
 <h2 id="_options">OPTIONS</h2>
 <div class="sectionbody">
@@ -608,9 +609,9 @@ with merge conflicts.</p></div>
 <dd>
 <p>
         Use the merge resolution program specified by &lt;tool&gt;.
-        Valid merge tools are:
-        araxis, bc3, diffuse, ecmerge, emerge, gvimdiff, kdiff3,
-        meld, opendiff, p4merge, tkdiff, tortoisemerge, vimdiff and xxdiff.
+        Valid values include emerge, gvimdiff, kdiff3,
+        meld, vimdiff, and tortoisemerge. Run <tt>git mergetool --tool-help</tt>
+        for the list of valid &lt;tool&gt; settings.
 </p>
 <div class="paragraph"><p>If a merge resolution program is not specified, <em>git mergetool</em>
 will use the configuration variable <tt>merge.tool</tt>.  If the
@@ -640,6 +641,14 @@ merge resolution with its exit code, then the configuration
 variable <tt>mergetool.&lt;tool&gt;.trustExitCode</tt> can be set to <tt>true</tt>.
 Otherwise, <em>git mergetool</em> will prompt the user to indicate the
 success of the resolution after the custom tool has exited.</p></div>
+</dd>
+<dt class="hdlist1">
+--tool-help
+</dt>
+<dd>
+<p>
+        Print a list of merge tools that may be used with <tt>--tool</tt>.
+</p>
 </dd>
 <dt class="hdlist1">
 -y
@@ -682,7 +691,7 @@ are successfully merged.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-08-27 14:06:30 PDT
 </div>
 </div>
 </body>

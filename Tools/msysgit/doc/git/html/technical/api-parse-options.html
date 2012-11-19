@@ -615,7 +615,8 @@ Short options may be bundled, e.g. <tt>-a -b</tt> can be specified as <tt>-ab</t
 <li>
 <p>
 Boolean long options can be <em>negated</em> (or <em>unset</em>) by prepending
-  <tt>no-</tt>, e.g. <tt>--no-abbrev</tt> instead of <tt>--abbrev</tt>.
+  <tt>no-</tt>, e.g. <tt>--no-abbrev</tt> instead of <tt>--abbrev</tt>. Conversely,
+  options that begin with <tt>no-</tt> can be <em>negated</em> by removing it.
 </p>
 </li>
 <li>
@@ -792,12 +793,22 @@ There are some macros to easily define options:</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<tt>OPT_BOOLEAN(short, long, &amp;int_var, description)</tt>
+<tt>OPT_BOOL(short, long, &amp;int_var, description)</tt>
 </dt>
 <dd>
 <p>
-        Introduce a boolean option.
-        <tt>int_var</tt> is incremented on each use.
+        Introduce a boolean option. <tt>int_var</tt> is set to one with
+        <tt>--option</tt> and set to zero with <tt>--no-option</tt>.
+</p>
+</dd>
+<dt class="hdlist1">
+<tt>OPT_COUNTUP(short, long, &amp;int_var, description)</tt>
+</dt>
+<dd>
+<p>
+        Introduce a count-up option.
+        <tt>int_var</tt> is incremented on each use of <tt>--option</tt>, and
+        reset to zero with <tt>--no-option</tt>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -823,8 +834,9 @@ There are some macros to easily define options:</p></div>
 </dt>
 <dd>
 <p>
-        Introduce a boolean option.
-        If used, set <tt>int_var</tt> to <tt>integer</tt>.
+        Introduce an integer option.
+        <tt>int_var</tt> is set to <tt>integer</tt> with <tt>--option</tt>, and
+        reset to zero with <tt>--no-option</tt>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -919,6 +931,16 @@ There are some macros to easily define options:</p></div>
         0 otherwise.
 </p>
 </dd>
+<dt class="hdlist1">
+<tt>OPT_NOOP_NOARG(short, long)</tt>
+</dt>
+<dd>
+<p>
+        Introduce an option that has no effect and takes no arguments.
+        Use it to hide deprecated options that are still to be recognized
+        and ignored silently.
+</p>
+</dd>
 </dl></div>
 <div class="paragraph"><p>The last element of the array must be <tt>OPT_END()</tt>.</p></div>
 <div class="paragraph"><p>If not stated otherwise, interpret the arguments as follows:</p></div>
@@ -926,7 +948,7 @@ There are some macros to easily define options:</p></div>
 <li>
 <p>
 <tt>short</tt> is a character for the short option
-  (e.g. <tt>&#39;e&#39;</tt> for <tt>-e</tt>, use <tt>0</tt> to omit),
+  (e.g. <tt>'e'</tt> for <tt>-e</tt>, use <tt>0</tt> to omit),
 </p>
 </li>
 <li>
@@ -949,7 +971,7 @@ There are some macros to easily define options:</p></div>
 <p>
 <tt>arg_str</tt> is the string that is shown as argument
   (e.g. <tt>"branch"</tt> will result in <tt>&lt;branch&gt;</tt>).
-  If set to <tt>NULL</tt>, three dots (<tt>&#8230;</tt>) will be displayed.
+  If set to <tt>NULL</tt>, three dots (<tt>...</tt>) will be displayed.
 </p>
 </li>
 <li>
@@ -1017,7 +1039,7 @@ for real-world examples.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-05-02 15:00:44 PDT
 </div>
 </div>
 </body>

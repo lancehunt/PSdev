@@ -594,6 +594,11 @@ git-blame(1) Manual Page
 <div class="paragraph"><p>Annotates each line in the given file with information from the revision which
 last modified the line. Optionally, start annotating from the given revision.</p></div>
 <div class="paragraph"><p>The command can also limit the range of lines annotated.</p></div>
+<div class="paragraph"><p>The origin of lines is automatically followed across whole-file
+renames (currently there is no option to turn the rename-following
+off). To follow lines moved from one file to another, or to follow
+lines that were copied and pasted from another file, etc., see the
+<tt>-C</tt> and <tt>-M</tt> options.</p></div>
 <div class="paragraph"><p>The report does not tell you anything about lines which have been deleted or
 replaced; you need to use a tool such as <em>git diff</em> or the "pickaxe"
 interface briefly mentioned in the following paragraph.</p></div>
@@ -818,9 +823,6 @@ take effect.</p></div>
 <dt class="hdlist1">
 -h
 </dt>
-<dt class="hdlist1">
---help
-</dt>
 <dd>
 <p>
         Show help message.
@@ -1021,7 +1023,7 @@ introduced the file with:</p></div>
 <pre><tt>git log --diff-filter=A --pretty=short -- foo</tt></pre>
 </div></div>
 <div class="paragraph"><p>and then annotate the change between the commit and its
-parents, using <tt>commit&#94;!</tt> notation:</p></div>
+parents, using <tt>commit^!</tt> notation:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>git blame -C -C -f $commit^! -- foo</tt></pre>
@@ -1169,7 +1171,7 @@ the email address.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-10-01 13:59:22 PDT
 </div>
 </div>
 </body>

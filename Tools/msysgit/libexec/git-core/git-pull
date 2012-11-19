@@ -11,7 +11,7 @@ OPTIONS_SPEC=
 . git-sh-setup
 . git-sh-i18n
 set_reflog_action "pull${1+ $*}"
-require_work_tree
+require_work_tree_exists
 cd_to_toplevel
 
 
@@ -40,10 +40,23 @@ test -f "$GIT_DIR/MERGE_HEAD" && die_merge
 
 strategy_args= diffstat= no_commit= squash= no_ff= ff_only=
 log_arg= verbosity= progress= recurse_submodules=
-merge_args=
+merge_args= edit=
 curr_branch=$(git symbolic-ref -q HEAD)
 curr_branch_short="${curr_branch#refs/heads/}"
-rebase=$(git config --bool branch.$curr_branch_short.rebase)
+rebase_options=
+case "$(git config branch.$curr_branch_short.rebase)" in
+interactive)
+	rebase_options=-i
+	rebase=true
+	;;
+*)
+	rebase=$(git config --bool branch.$curr_branch_short.rebase)
+	;;
+esac
+if test -z "$rebase"
+then
+	rebase=$(git config --bool pull.rebase)
+fi
 dry_run=
 while :
 do
@@ -66,6 +79,10 @@ do
 		no_commit=--no-commit ;;
 	--c|--co|--com|--comm|--commi|--commit)
 		no_commit=--commit ;;
+	-e|--edit)
+		edit=--edit ;;
+	--no-edit)
+		edit=--no-edit ;;
 	--sq|--squ|--squa|--squas|--squash)
 		squash=--squash ;;
 	--no-sq|--no-squ|--no-squa|--no-squas|--no-squash)
@@ -105,7 +122,12 @@ do
 	-r|--r|--re|--reb|--reba|--rebas|--rebase)
 		rebase=true
 		;;
+	--rebase=i|--rebase=interactive)
+		rebase_options=-i
+		rebase=true
+		;;
 	--no-r|--no-re|--no-reb|--no-reba|--no-rebas|--no-rebase)
+		rebase_options=
 		rebase=false
 		;;
 	--recurse-submodules)
@@ -172,7 +194,7 @@ error_on_no_merge_candidates () {
 	elif [ -z "$curr_branch" -o -z "$upstream" ]; then
 		. git-parse-remote
 		error_on_missing_default_upstream "pull" $op_type $op_prep \
-			"git pull <repository> <refspec>"
+			"git pull <remote> <branch>"
 	else
 		echo "Your configuration specifies to $op_type $op_prep the ref '${upstream#refs/heads/}'"
 		echo "from the remote, but no such ref was fetched."
@@ -270,11 +292,11 @@ fi
 merge_name=$(git fmt-merge-msg $log_arg <"$GIT_DIR/FETCH_HEAD") || exit
 case "$rebase" in
 true)
-	eval="git-rebase $diffstat $strategy_args $merge_args"
+	eval="git-rebase $rebase_options $diffstat $strategy_args $merge_args"
 	eval="$eval --onto $merge_head ${oldremoteref:-$merge_head}"
 	;;
 *)
-	eval="git-merge $diffstat $no_commit $squash $no_ff $ff_only"
+	eval="git-merge $diffstat $no_commit $edit $squash $no_ff $ff_only"
 	eval="$eval  $log_arg $strategy_args $merge_args $verbosity $progress"
 	eval="$eval \"\$merge_name\" HEAD $merge_head"
 	;;

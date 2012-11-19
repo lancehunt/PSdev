@@ -44,22 +44,26 @@ a "true" or "false" string for bool), or '--path', which does some
 path expansion (see '--path' below).  If no type specifier is passed, no
 checks or transformations are performed on the value.
 
-The file-option can be one of '--system', '--global' or '--file'
-which specify where the values will be read from or written to.
-The default is to assume the config file of the current repository,
-.git/config unless defined otherwise with GIT_DIR and GIT_CONFIG
-(see <<FILES>>).
+When reading, the values are read from the system, global and
+repository local configuration files by default, and options
+'--system', '--global', '--local' and '--file <filename>' can be
+used to tell the command to read from only that location (see <<FILES>>).
 
-This command will fail (with exit code ret) if:
+When writing, the new value is written to the repository local
+configuration file by default, and options '--system', '--global',
+'--file <filename>' can be used to tell the command to write to
+that location (you can say '--local' but that is the default).
+
+This command will fail with non-zero status upon error.  Some exit
+codes are:
 
 . The config file is invalid (ret=3),
 . can not write to the config file (ret=4),
 . no section or name was provided (ret=2),
 . the section or key is invalid (ret=1),
 . you try to unset an option which does not exist (ret=5),
-. you try to unset/set an option for which multiple lines match (ret=5),
-. you try to use an invalid regexp (ret=6), or
-. you use '--global' option without $HOME being properly set (ret=128).
+. you try to unset/set an option for which multiple lines match (ret=5), or
+. you try to use an invalid regexp (ret=6).
 
 On success, the command returns the exit code 0.
 
@@ -85,15 +89,19 @@ OPTIONS
 	is not exactly one.
 
 --get-regexp::
-	Like --get-all, but interprets the name as a regular expression.
-	Also outputs the key names.
+	Like --get-all, but interprets the name as a regular expression and
+	writes out the key names.  Regular expression matching is currently
+	case-sensitive and done against a canonicalized version of the key
+	in which section and variable names are lowercased, but subsection
+	names are not.
 
 --global::
 	For writing options: write to global ~/.gitconfig file rather than
-	the repository .git/config.
+	the repository .git/config, write to $XDG_CONFIG_HOME/git/config file
+	if this file exists and the ~/.gitconfig file doesn't.
 +
-For reading options: read only from global ~/.gitconfig rather than
-from all available files.
+For reading options: read only from global ~/.gitconfig and from
+$XDG_CONFIG_HOME/git/config rather than from all available files.
 +
 See also <<FILES>>.
 
@@ -178,21 +186,32 @@ See also <<FILES>>.
 	Opens an editor to modify the specified config file; either
 	'--system', '--global', or repository (default).
 
+--includes::
+--no-includes::
+	Respect `include.*` directives in config files when looking up
+	values. Defaults to on.
+
 [[FILES]]
 FILES
 -----
 
-If not set explicitly with '--file', there are three files where
+If not set explicitly with '--file', there are four files where
 'git config' will search for configuration options:
 
 $GIT_DIR/config::
-	Repository specific configuration file. (The filename is
-	of course relative to the repository root, not the working
-	directory.)
+	Repository specific configuration file.
 
 ~/.gitconfig::
 	User-specific configuration file. Also called "global"
 	configuration file.
+
+$XDG_CONFIG_HOME/git/config::
+	Second user-specific configuration file. If $XDG_CONFIG_HOME is not set
+	or empty, $HOME/.config/git/config will be used. Any single-valued
+	variable set in this file will be overwritten by whatever is in
+	~/.gitconfig.  It is a good idea not to create this file if
+	you sometimes use older versions of Git, as support for this
+	file was added fairly recently.
 
 $(prefix)/etc/gitconfig::
 	System-wide configuration file.
@@ -248,7 +267,7 @@ Given a .git/config like this:
 
 	; Proxy settings
 	[core]
-		gitproxy="proxy-command" for kernel.org
+		gitproxy=proxy-command for kernel.org
 		gitproxy=default-proxy ; for all the rest
 
 you can set the filemode to true with
@@ -323,7 +342,7 @@ To actually match only values with an exclamation mark, you have to
 To add a new proxy, without altering any of the existing ones, use
 
 ------------
-% git config core.gitproxy '"proxy-command" for example.com'
+% git config --add core.gitproxy '"proxy-command" for example.com'
 ------------
 
 An example to use customized color from the configuration in your

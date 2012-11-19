@@ -431,7 +431,7 @@ set ::msgcat::header "Project-Id-Version: nb\nReport-Msgid-Bugs-To: \nPOT-Creati
 ::msgcat::mcset nb "Generating..." "Genererer..."
 ::msgcat::mcset nb "Could not start ssh-keygen:\n\n%s" "Kunne ikke starte ssh-keygen:\n\n%s"
 ::msgcat::mcset nb "Generation failed." "Generering feilet."
-::msgcat::mcset nb "Generation succeded, but no keys found." "Generering vellykket, men ingen n\u00f8kler er funnet."
+::msgcat::mcset nb "Generation succeeded, but no keys found." "Generering vellykket, men ingen n\u00f8kler er funnet."
 ::msgcat::mcset nb "Your key is in: %s" "N\u00f8kkelen din ligger i: %s"
 ::msgcat::mcset nb "%s ... %*i of %*i %s (%3i%%)" "%s ... %*i av %*i %s (%3i%%)"
 ::msgcat::mcset nb "Running %s requires a selected file." "\u00c5 kj\u00f8re %s krever at en fil er valgt"

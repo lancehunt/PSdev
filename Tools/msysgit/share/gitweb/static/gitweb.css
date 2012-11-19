@@ -438,6 +438,10 @@ div.diff.add {
 	color: #008800;
 }
 
+div.diff.add span.marked {
+	background-color: #aaffaa;
+}
+
 div.diff.from_file a.path,
 div.diff.from_file {
 	color: #aa0000;
@@ -445,6 +449,10 @@ div.diff.from_file {
 
 div.diff.rem {
 	color: #cc0000;
+}
+
+div.diff.rem span.marked {
+	background-color: #ffaaaa;
 }
 
 div.diff.chunk_header a,
@@ -475,6 +483,36 @@ div.diff.nodifferences {
 	color: #600000;
 }
 
+/* side-by-side diff */
+div.chunk_block {
+	overflow: hidden;
+}
+
+div.chunk_block div.old {
+	float: left;
+	width: 50%;
+	overflow: hidden;
+}
+
+div.chunk_block div.new {
+	margin-left: 50%;
+	width: 50%;
+}
+
+div.chunk_block.rem div.old div.diff.rem {
+	background-color: #fff5f5;
+}
+div.chunk_block.add div.new div.diff.add {
+	background-color: #f8fff8;
+}
+div.chunk_block.chg div     div.diff {
+	background-color: #fffff0;
+}
+div.chunk_block.ctx div     div.diff.ctx {
+	color: #404040;
+}
+
+
 div.index_include {
 	border: solid #d9d8d1;
 	border-width: 0px 0px 1px;
@@ -490,8 +528,13 @@ div.search {
 	right: 12px
 }
 
-p.projsearch {
+div.projsearch {
 	text-align: center;
+	margin: 20px 0px;
+}
+
+div.projsearch form {
+	margin-bottom: 2px;
 }
 
 td.linenr {

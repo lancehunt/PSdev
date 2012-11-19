@@ -26,8 +26,14 @@ constructor new {commit {path {}}} {
 	wm withdraw $top
 	wm title $top [append "[appname] ([reponame]): " [mc "File Browser"]]
 
+	if {$path ne {}} {
+		if {[string index $path end] ne {/}} {
+			append path /
+		}
+	}
+
 	set browser_commit $commit
-	set browser_path $browser_commit:$path
+	set browser_path "$browser_commit:[escape_path $path]"
 
 	${NS}::label $w.path \
 		-textvariable @browser_path \
@@ -191,7 +197,7 @@ method _ls {tree_id {name {}}} {
 	$w conf -state disabled
 
 	set fd [git_read ls-tree -z $tree_id]
-	fconfigure $fd -blocking 0 -translation binary -encoding binary
+	fconfigure $fd -blocking 0 -translation binary -encoding utf-8
 	fileevent $fd readable [cb _read $fd]
 }
 

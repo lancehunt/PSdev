@@ -583,7 +583,7 @@ git-rerere(1) Manual Page
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<div class="verseblock-content"><em>git rerere</em> [<em>clear</em>|<em>forget</em> &lt;pathspec&gt;|<em>diff</em>|<em>status</em>|<em>gc</em>]</div>
+<div class="verseblock-content"><em>git rerere</em> [<em>clear</em>|<em>forget</em> &lt;pathspec&gt;|<em>diff</em>|<em>remaining</em>|<em>status</em>|<em>gc</em>]</div>
 <div class="verseblock-attribution">
 </div></div>
 </div>
@@ -618,7 +618,7 @@ its working state.</p></div>
 </dt>
 <dd>
 <p>
-This resets the metadata used by rerere if a merge resolution is to be
+Reset the metadata used by rerere if a merge resolution is to be
 aborted.  Calling <em>git am [--skip|--abort]</em> or <em>git rebase [--skip|--abort]</em>
 will automatically invoke this command.
 </p>
@@ -628,7 +628,7 @@ will automatically invoke this command.
 </dt>
 <dd>
 <p>
-This resets the conflict resolutions which rerere has recorded for the current
+Reset the conflict resolutions which rerere has recorded for the current
 conflict in &lt;pathspec&gt;.
 </p>
 </dd>
@@ -637,7 +637,7 @@ conflict in &lt;pathspec&gt;.
 </dt>
 <dd>
 <p>
-This displays diffs for the current state of the resolution.  It is
+Display diffs for the current state of the resolution.  It is
 useful for tracking what has changed while the user is resolving
 conflicts.  Additional arguments are passed directly to the system
 <em>diff</em> command installed in PATH.
@@ -648,8 +648,17 @@ conflicts.  Additional arguments are passed directly to the system
 </dt>
 <dd>
 <p>
-Like <em>diff</em>, but this only prints the filenames that will be tracked
-for resolutions.
+Print paths with conflicts whose merge resolution rerere will record.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>remaining</em>
+</dt>
+<dd>
+<p>
+Print paths with conflicts that have not been autoresolved by rerere.
+This includes paths whose resolutions cannot be tracked by rerere,
+such as conflicting submodules.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -657,7 +666,7 @@ for resolutions.
 </dt>
 <dd>
 <p>
-This prunes records of conflicted merges that
+Prune records of conflicted merges that
 occurred a long time ago.  By default, unresolved conflicts older
 than 15 days and resolved conflicts older than 60
 days are pruned.  These defaults are controlled via the
@@ -692,14 +701,14 @@ One way to do it is to pull master into the topic branch:</p></div>
 </div></div>
 <div class="paragraph"><p>The commits marked with <tt>*</tt> touch the same area in the same
 file; you need to resolve the conflicts when creating the commit
-marked with <tt>&#43;</tt>.  Then you can test the result to make sure your
+marked with <tt>+</tt>.  Then you can test the result to make sure your
 work-in-progress still works with what is in the latest master.</p></div>
 <div class="paragraph"><p>After this test merge, there are two ways to continue your work
 on the topic.  The easiest is to build on top of the test merge
-commit <tt>&#43;</tt>, and when your work in the topic branch is finally
+commit <tt>+</tt>, and when your work in the topic branch is finally
 ready, pull the topic branch into master, and/or ask the
 upstream to pull from you.  By that time, however, the master or
-the upstream might have been advanced since the test merge <tt>&#43;</tt>,
+the upstream might have been advanced since the test merge <tt>+</tt>,
 in which case the final commit graph would look like this:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -800,7 +809,7 @@ conflict.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-05-02 15:00:44 PDT
 </div>
 </div>
 </body>

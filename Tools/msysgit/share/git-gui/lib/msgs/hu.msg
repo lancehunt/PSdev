@@ -470,7 +470,7 @@ set ::msgcat::header "Project-Id-Version: git-gui-i 18n\nReport-Msgid-Bugs-To: \
 ::msgcat::mcset hu "Generating..." "Gener\u00e1l\u00e1s..."
 ::msgcat::mcset hu "Could not start ssh-keygen:\n\n%s" "Az ssh-keygen ind\u00edt\u00e1sa sikertelen:\n\n%s"
 ::msgcat::mcset hu "Generation failed." "A gener\u00e1l\u00e1s nem siker\u00fclt."
-::msgcat::mcset hu "Generation succeded, but no keys found." "A gener\u00e1l\u00e1s sikeres, de egy kulcs se tal\u00e1lhat\u00f3."
+::msgcat::mcset hu "Generation succeeded, but no keys found." "A gener\u00e1l\u00e1s sikeres, de egy kulcs se tal\u00e1lhat\u00f3."
 ::msgcat::mcset hu "Your key is in: %s" "A kulcsunk itt van: %s"
 ::msgcat::mcset hu "%s ... %*i of %*i %s (%3i%%)" "%s ... %*i / %*i %s (%3i%%)"
 ::msgcat::mcset hu "Running %s requires a selected file." "A(z) %s futtat\u00e1sa egy kiv\u00e1lasztott f\u00e1jlt ig\u00e9nyel."

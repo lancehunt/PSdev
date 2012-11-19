@@ -584,7 +584,7 @@ git-push(1) Manual Page
 <div class="sectionbody">
 <div class="verseblock">
 <div class="verseblock-content"><em>git push</em> [--all | --mirror | --tags] [-n | --dry-run] [--receive-pack=&lt;git-receive-pack&gt;]
-           [--repo=&lt;repository&gt;] [-f | --force] [-v | --verbose] [-u | --set-upstream]
+           [--repo=&lt;repository&gt;] [-f | --force] [--prune] [-v | --verbose] [-u | --set-upstream]
            [&lt;repository&gt; [&lt;refspec&gt;&#8230;]]</div>
 <div class="verseblock-attribution">
 </div></div>
@@ -617,10 +617,12 @@ documentation for <a href="git-receive-pack.html">git-receive-pack(1)</a>.</p></
 <dd>
 <p>
         The format of a &lt;refspec&gt; parameter is an optional plus
-        <tt>&#43;</tt>, followed by the source ref &lt;src&gt;, followed
+        <tt>+</tt>, followed by the source ref &lt;src&gt;, followed
         by a colon <tt>:</tt>, followed by the destination ref &lt;dst&gt;.
         It is used to specify with what &lt;src&gt; object the &lt;dst&gt; ref
-        in the remote repository is to be updated.
+        in the remote repository is to be updated.  If not specified,
+        the behavior of the command is controlled by the <tt>push.default</tt>
+        configuration variable.
 </p>
 <div class="paragraph"><p>The &lt;src&gt; is often the name of the branch you would want to push, but
 it can be any arbitrary "SHA-1 expression", such as <tt>master~4</tt> or
@@ -631,19 +633,20 @@ be named. If <tt>:</tt>&lt;dst&gt; is omitted, the same ref as &lt;src&gt; will 
 updated.</p></div>
 <div class="paragraph"><p>The object referenced by &lt;src&gt; is used to update the &lt;dst&gt; reference
 on the remote side, but by default this is only allowed if the
-update can fast-forward &lt;dst&gt;.  By having the optional leading <tt>&#43;</tt>,
+update can fast-forward &lt;dst&gt;.  By having the optional leading <tt>+</tt>,
 you can tell git to update the &lt;dst&gt; ref even when the update is not a
 fast-forward.  This does <strong>not</strong> attempt to merge &lt;src&gt; into &lt;dst&gt;.  See
 EXAMPLES below for details.</p></div>
 <div class="paragraph"><p><tt>tag &lt;tag&gt;</tt> means the same as <tt>refs/tags/&lt;tag&gt;:refs/tags/&lt;tag&gt;</tt>.</p></div>
 <div class="paragraph"><p>Pushing an empty &lt;src&gt; allows you to delete the &lt;dst&gt; ref from
 the remote repository.</p></div>
-<div class="paragraph"><p>The special refspec <tt>:</tt> (or <tt>&#43;:</tt> to allow non-fast-forward updates)
+<div class="paragraph"><p>The special refspec <tt>:</tt> (or <tt>+:</tt> to allow non-fast-forward updates)
 directs git to push "matching" branches: for every branch that exists on
 the local side, the remote side is updated if a branch of the same name
 already exists on the remote side.  This is the default operation mode
 if no explicit refspec is found (that is neither on the command line
-nor in any Push line of the corresponding remotes file---see below).</p></div>
+nor in any Push line of the corresponding remotes file---see below) and
+no <tt>push.default</tt> configuration variable is set.</p></div>
 </dd>
 <dt class="hdlist1">
 --all
@@ -652,6 +655,19 @@ nor in any Push line of the corresponding remotes file---see below).</p></div>
 <p>
         Instead of naming each ref to push, specifies that all
         refs under <tt>refs/heads/</tt> be pushed.
+</p>
+</dd>
+<dt class="hdlist1">
+--prune
+</dt>
+<dd>
+<p>
+        Remove remote branches that don&#8217;t have a local counterpart. For example
+        a remote branch <tt>tmp</tt> will be removed if a local branch with the same
+        name doesn&#8217;t exist any more. This also respects refspecs, e.g.
+        <tt>git push --prune remote refs/heads/*:refs/tmp/*</tt> would
+        make sure that remote <tt>refs/tmp/foo</tt> will be removed if <tt>refs/heads/foo</tt>
+        doesn&#8217;t exist.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -824,13 +840,19 @@ useful if you write an alias or script around <em>git push</em>.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
---recurse-submodules=check
+--recurse-submodules=check|on-demand
 </dt>
 <dd>
 <p>
-        Check whether all submodule commits used by the revisions to be
-        pushed are available on a remote tracking branch. Otherwise the
-        push will be aborted and the command will exit with non-zero status.
+        Make sure all submodule commits used by the revisions to be
+        pushed are available on a remote tracking branch. If <em>check</em> is
+        used git will verify that all submodule commits that changed in
+        the revisions to be pushed are available on at least one remote
+        of the submodule. If any commits are missing the push will be
+        aborted and exit with non-zero status. If <em>on-demand</em> is used
+        all submodules that changed in the revisions to be pushed will
+        be pushed. If on-demand was not able to push all necessary
+        revisions it will also be aborted and exit with non-zero status.
 </p>
 </dd>
 </dl></div>
@@ -841,8 +863,11 @@ useful if you write an alias or script around <em>git push</em>.</p></div>
 address of the remote server, and the path to the repository.
 Depending on the transport protocol, some of this information may be
 absent.</p></div>
-<div class="paragraph"><p>Git natively supports ssh, git, http, https, ftp, ftps, and rsync
-protocols. The following syntaxes may be used with them:</p></div>
+<div class="paragraph"><p>Git supports ssh, git, http, and https protocols (in addition, ftp,
+and ftps can be used for fetching and rsync can be used for fetching
+and pushing, but these are inefficient and deprecated; do not use
+them).</p></div>
+<div class="paragraph"><p>The following syntaxes may be used with them:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -1081,7 +1106,7 @@ for a successfully pushed fast-forward;
 </p>
 </dd>
 <dt class="hdlist1">
-<tt>&#43;</tt>
+<tt>+</tt>
 </dt>
 <dd>
 <p>
@@ -1288,7 +1313,8 @@ a case where you do mean to lose history.</p></div>
         <tt>git push origin :</tt>.
 </p>
 <div class="paragraph"><p>The default behavior of this command when no &lt;refspec&gt; is given can be
-configured by setting the <tt>push</tt> option of the remote.</p></div>
+configured by setting the <tt>push</tt> option of the remote, or the <tt>push.default</tt>
+configuration variable.</p></div>
 <div class="paragraph"><p>For example, to default to pushing only the current branch to <tt>origin</tt>
 use <tt>git config remote.origin.push HEAD</tt>.  Any valid &lt;refspec&gt; (like
 the ones in the examples below) can be configured as the default for
@@ -1368,7 +1394,7 @@ the ones in the examples below) can be configured as the default for
 </p>
 </dd>
 <dt class="hdlist1">
-<tt>git push origin &#43;dev:master</tt>
+<tt>git push origin +dev:master</tt>
 </dt>
 <dd>
 <p>
@@ -1404,7 +1430,7 @@ a <tt>git gc</tt> command on the origin repository.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2012-10-02 15:49:44 PDT
 </div>
 </div>
 </body>

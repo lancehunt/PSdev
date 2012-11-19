@@ -645,6 +645,15 @@ git-diff-tree(1) Manual Page
 </p>
 </dd>
 <dt class="hdlist1">
+--minimal
+</dt>
+<dd>
+<p>
+        Spend extra time to make sure the smallest possible
+        diff is produced.
+</p>
+</dd>
+<dt class="hdlist1">
 --patience
 </dt>
 <dd>
@@ -653,17 +662,31 @@ git-diff-tree(1) Manual Page
 </p>
 </dd>
 <dt class="hdlist1">
+--histogram
+</dt>
+<dd>
+<p>
+        Generate a diff using the "histogram diff" algorithm.
+</p>
+</dd>
+<dt class="hdlist1">
 --stat[=&lt;width&gt;[,&lt;name-width&gt;[,&lt;count&gt;]]]
 </dt>
 <dd>
 <p>
-        Generate a diffstat.  You can override the default
-        output width for 80-column terminal by <tt>--stat=&lt;width&gt;</tt>.
-        The width of the filename part can be controlled by
-        giving another width to it separated by a comma.
+        Generate a diffstat. By default, as much space as necessary
+        will be used for the filename part, and the rest for the graph
+        part. Maximum width defaults to terminal width, or 80 columns
+        if not connected to a terminal, and can be overridden by
+        <tt>&lt;width&gt;</tt>. The width of the filename part can be limited by
+        giving another width <tt>&lt;name-width&gt;</tt> after a comma. The width
+        of the graph part can be limited by using
+        <tt>--stat-graph-width=&lt;width&gt;</tt> (affects all commands generating
+        a stat graph) or by setting <tt>diff.statGraphWidth=&lt;width&gt;</tt>
+        (does not affect <tt>git format-patch</tt>).
         By giving a third parameter <tt>&lt;count&gt;</tt>, you can limit the
-        output to the first <tt>&lt;count&gt;</tt> lines, followed by
-        <tt>&#8230;</tt> if there are more.
+        output to the first <tt>&lt;count&gt;</tt> lines, followed by <tt>...</tt> if
+        there are more.
 </p>
 <div class="paragraph"><p>These parameters can also be set individually with <tt>--stat-width=&lt;width&gt;</tt>,
 <tt>--stat-name-width=&lt;name-width&gt;</tt> and <tt>--stat-count=&lt;count&gt;</tt>.</p></div>
@@ -819,11 +842,12 @@ any of those replacements occurred.</p></div>
 </dt>
 <dd>
 <p>
-        Chose the output format for submodule differences. &lt;format&gt; can be one of
-        <em>short</em> and <em>log</em>. <em>short</em> just shows pairs of commit names, this format
-        is used when this option is not given. <em>log</em> is the default value for this
-        option and lists the commits in that commit range like the <em>summary</em>
-        option of <a href="git-submodule.html">git-submodule(1)</a> does.
+        Specify how differences in submodules are shown.  When <tt>--submodule</tt>
+        or <tt>--submodule=log</tt> is given, the <em>log</em> format is used.  This format lists
+        the commits in the range like <a href="git-submodule.html">git-submodule(1)</a> <tt>summary</tt> does.
+        Omitting the <tt>--submodule</tt> option or specifying <tt>--submodule=short</tt>,
+        uses the <em>short</em> format. This format just shows the names of the commits
+        at the beginning and end of the range.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -869,7 +893,7 @@ plain
 </dt>
 <dd>
 <p>
-        Show words as <tt>[-removed-]</tt> and <tt>{<tt>added</tt>}</tt>.  Makes no
+        Show words as <tt>[-removed-]</tt> and <tt>{+added+}</tt>.  Makes no
         attempts to escape the delimiters if they appear in the input,
         so the output may be ambiguous.
 </p>
@@ -1228,6 +1252,17 @@ of a delete/create pair.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+-W
+</dt>
+<dt class="hdlist1">
+--function-context
+</dt>
+<dd>
+<p>
+        Show whole surrounding functions of changes.
+</p>
+</dd>
+<dt class="hdlist1">
 --exit-code
 </dt>
 <dd>
@@ -1342,7 +1377,7 @@ of a delete/create pair.</p></div>
 <p>
         If provided, the results are limited to a subset of files
         matching one of these prefix strings.
-        i.e., file matches <tt>/^&lt;pattern1&gt;|&lt;pattern2&gt;|&#8230;/</tt>
+        i.e., file matches <tt>/^&lt;pattern1&gt;|&lt;pattern2&gt;|.../</tt>
         Note that this parameter does not provide any wildcard or regexp
         features.
 </p>
@@ -1530,6 +1565,15 @@ being displayed. Examples: "--notes=foo" will show only notes from
 <p>
         These options are deprecated. Use the above --notes/--no-notes
         options instead.
+</p>
+</dd>
+<dt class="hdlist1">
+--show-signature
+</dt>
+<dd>
+<p>
+        Check the validity of a signed commit object by passing the signature
+        to <tt>gpg --verify</tt> and show the output.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1884,12 +1928,47 @@ The title was &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </li>
 <li>
 <p>
+<em>%GG</em>: raw verification message from GPG for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%G?</em>: show either "G" for Good or "B" for Bad for a signed commit
+</p>
+</li>
+<li>
+<p>
+<em>%GS</em>: show the name of the signer for a signed commit
+</p>
+</li>
+<li>
+<p>
 <em>%gD</em>: reflog selector, e.g., <tt>refs/stash@{1}</tt>
 </p>
 </li>
 <li>
 <p>
 <em>%gd</em>: shortened reflog selector, e.g., <tt>stash@{1}</tt>
+</p>
+</li>
+<li>
+<p>
+<em>%gn</em>: reflog identity name
+</p>
+</li>
+<li>
+<p>
+<em>%gN</em>: reflog identity name (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
+</p>
+</li>
+<li>
+<p>
+<em>%ge</em>: reflog identity email
+</p>
+</li>
+<li>
+<p>
+<em>%gE</em>: reflog identity email (respecting .mailmap, see <a href="git-shortlog.html">git-shortlog(1)</a> or <a href="git-blame.html">git-blame(1)</a>)
 </p>
 </li>
 <li>
@@ -1963,7 +2042,7 @@ insert an empty string unless we are traversing reflog entries (e.g., by
 format if <tt>--decorate</tt> was not already provided on the command line.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>If you add a <tt>&#43;</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
+<div class="paragraph"><p>If you add a <tt>+</tt> (plus sign) after <em>%</em> of a placeholder, a line-feed
 is inserted immediately before the expansion if and only if the
 placeholder expands to a non-empty string.</p></div>
 <div class="paragraph"><p>If you add a <tt>-</tt> (minus sign) after <em>%</em> of a placeholder, line-feeds that
@@ -2481,7 +2560,7 @@ added, from the point of view of that parent).</p></div>
 from both files (hence two <tt>-</tt> removals from both file1 and
 file2, plus <tt>++</tt> to mean one line that was added does not appear
 in either file1 nor file2).  Also eight other lines are the same
-from file1 but do not appear in file2 (hence prefixed with <tt>&#43;</tt>).</p></div>
+from file1 but do not appear in file2 (hence prefixed with <tt>+</tt>).</p></div>
 <div class="paragraph"><p>When shown by <tt>git diff-tree -c</tt>, it compares the parents of a
 merge commit with the merge result (i.e. file1..fileN are the
 parents).  When shown by <tt>git diff-files -c</tt>, it compares the
@@ -2612,7 +2691,7 @@ the pathname, but if that is <tt>NUL</tt>, the record will show two paths.</p></
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-09-21 23:01:14 PDT
+Last updated 2011-11-15 13:45:02 PDT
 </div>
 </div>
 </body>

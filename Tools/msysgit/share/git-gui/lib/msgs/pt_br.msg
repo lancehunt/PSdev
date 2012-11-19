@@ -476,7 +476,7 @@ set ::msgcat::header "Project-Id-Version: git-gui\nReport-Msgid-Bugs-To: \nPOT-C
 ::msgcat::mcset pt_br "Generating..." "Gerando..."
 ::msgcat::mcset pt_br "Could not start ssh-keygen:\n\n%s" "Imposs\u00edvel iniciar ssh-keygen:\n\n%s"
 ::msgcat::mcset pt_br "Generation failed." "A gera\u00e7\u00e3o da chave falhou."
-::msgcat::mcset pt_br "Generation succeded, but no keys found." "A gera\u00e7\u00e3o da chave foi bem-sucedida, mas nenhuma chave foi encontrada."
+::msgcat::mcset pt_br "Generation succeeded, but no keys found." "A gera\u00e7\u00e3o da chave foi bem-sucedida, mas nenhuma chave foi encontrada."
 ::msgcat::mcset pt_br "Your key is in: %s" "Sua chave em: %s"
 ::msgcat::mcset pt_br "%s ... %*i of %*i %s (%3i%%)" "%s ... %*i de %*i %s (%3i%%)"
 ::msgcat::mcset pt_br "Running %s requires a selected file." "\u00c9 preciso selecionar um arquivo para executar %s."

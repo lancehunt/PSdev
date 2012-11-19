@@ -476,7 +476,7 @@ set ::msgcat::header "Project-Id-Version: fr\nReport-Msgid-Bugs-To: \nPOT-Creati
 ::msgcat::mcset fr "Generating..." "G\u00e9n\u00e9ration..."
 ::msgcat::mcset fr "Could not start ssh-keygen:\n\n%s" "Impossible de lancer ssh-keygen :\n\n%s"
 ::msgcat::mcset fr "Generation failed." "La g\u00e9n\u00e9ration a \u00e9chou\u00e9."
-::msgcat::mcset fr "Generation succeded, but no keys found." "La g\u00e9n\u00e9ration a r\u00e9ussi, mais aucune cl\u00e9 n'a \u00e9t\u00e9 trouv\u00e9e."
+::msgcat::mcset fr "Generation succeeded, but no keys found." "La g\u00e9n\u00e9ration a r\u00e9ussi, mais aucune cl\u00e9 n'a \u00e9t\u00e9 trouv\u00e9e."
 ::msgcat::mcset fr "Your key is in: %s" "Votre cl\u00e9 est dans : %s"
 ::msgcat::mcset fr "%s ... %*i of %*i %s (%3i%%)" "%s ... %*i de %*i %s (%3i%%)"
 ::msgcat::mcset fr "Running %s requires a selected file." "Lancer %s n\u00e9cessite qu'un fichier soit s\u00e9lectionn\u00e9."

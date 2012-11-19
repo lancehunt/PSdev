@@ -586,17 +586,18 @@ git-tag(1) Manual Page
 <div class="verseblock-content"><em>git tag</em> [-a | -s | -u &lt;key-id&gt;] [-f] [-m &lt;msg&gt; | -F &lt;file&gt;]
         &lt;tagname&gt; [&lt;commit&gt; | &lt;object&gt;]
 <em>git tag</em> -d &lt;tagname&gt;&#8230;
-<em>git tag</em> [-n[&lt;num&gt;]] -l [--contains &lt;commit&gt;] [&lt;pattern&gt;&#8230;]
+<em>git tag</em> [-n[&lt;num&gt;]] -l [--contains &lt;commit&gt;] [--points-at &lt;object&gt;]
+        [--column[=&lt;options&gt;] | --no-column] [&lt;pattern&gt;&#8230;]
+        [&lt;pattern&gt;&#8230;]
 <em>git tag</em> -v &lt;tagname&gt;&#8230;</div>
 <div class="verseblock-attribution">
 </div></div>
 </div>
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Add a tag reference in <tt>.git/refs/tags/</tt>, unless <tt>-d/-l/-v</tt> is given
+<div class="paragraph"><p>Add a tag reference in <tt>refs/tags/</tt>, unless <tt>-d/-l/-v</tt> is given
 to delete, list or verify tags.</p></div>
-<div class="paragraph"><p>Unless <tt>-f</tt> is given, the tag to be created must not yet exist in the
-<tt>.git/refs/tags/</tt> directory.</p></div>
+<div class="paragraph"><p>Unless <tt>-f</tt> is given, the named tag must not yet exist.</p></div>
 <div class="paragraph"><p>If one of <tt>-a</tt>, <tt>-s</tt>, or <tt>-u &lt;key-id&gt;</tt> is passed, the command
 creates a <em>tag</em> object, and requires a tag message.  Unless
 <tt>-m &lt;msg&gt;</tt> or <tt>-F &lt;file&gt;</tt> is given, an editor is started for the user to type
@@ -608,7 +609,8 @@ created (i.e. a lightweight tag).</p></div>
 <div class="paragraph"><p>A GnuPG signed tag object will be created when <tt>-s</tt> or <tt>-u
 &lt;key-id&gt;</tt> is used.  When <tt>-u &lt;key-id&gt;</tt> is not used, the
 committer identity for the current user is used to find the
-GnuPG key for signing.</p></div>
+GnuPG key for signing.  The configuration variable <tt>gpg.program</tt>
+is used to specify custom GnuPG binary.</p></div>
 </div>
 <h2 id="_options">OPTIONS</h2>
 <div class="sectionbody">
@@ -632,7 +634,7 @@ GnuPG key for signing.</p></div>
 </dt>
 <dd>
 <p>
-        Make a GPG-signed tag, using the default e-mail address&#8217;s key
+        Make a GPG-signed tag, using the default e-mail address&#8217;s key.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -643,7 +645,7 @@ GnuPG key for signing.</p></div>
 </dt>
 <dd>
 <p>
-        Make a GPG-signed tag, using the given key
+        Make a GPG-signed tag, using the given key.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -707,11 +709,33 @@ GnuPG key for signing.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
+--column[=&lt;options&gt;]
+</dt>
+<dt class="hdlist1">
+--no-column
+</dt>
+<dd>
+<p>
+        Display tag listing in columns. See configuration variable
+        column.tag for option syntax.<tt>--column</tt> and <tt>--no-column</tt>
+        without options are equivalent to <em>always</em> and <em>never</em> respectively.
+</p>
+<div class="paragraph"><p>This option is only applicable when listing tags without annotation lines.</p></div>
+</dd>
+<dt class="hdlist1">
 --contains &lt;commit&gt;
 </dt>
 <dd>
 <p>
         Only list tags which contain the specified commit.
+</p>
+</dd>
+<dt class="hdlist1">
+--points-at &lt;object&gt;
+</dt>
+<dd>
+<p>
+        Only list tags of the given object.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -741,6 +765,18 @@ GnuPG key for signing.</p></div>
         read the message from the standard input.
         Implies <tt>-a</tt> if none of <tt>-a</tt>, <tt>-s</tt>, or <tt>-u &lt;key-id&gt;</tt>
         is given.
+</p>
+</dd>
+<dt class="hdlist1">
+--cleanup=&lt;mode&gt;
+</dt>
+<dd>
+<p>
+        This option sets how the tag message is cleaned up.
+        The  <em>&lt;mode&gt;</em> can be one of <em>verbatim</em>, <em>whitespace</em> and <em>strip</em>.  The
+        <em>strip</em> mode is default. The <em>verbatim</em> mode does not change message at
+        all, <em>whitespace</em> removes just leading/trailing whitespace lines and
+        <em>strip</em> removes both whitespace and commentary.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -958,7 +994,7 @@ ISO 8601
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-10-05 13:59:16 PDT
+Last updated 2012-08-22 12:54:47 PDT
 </div>
 </div>
 </body>
